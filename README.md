@@ -4,6 +4,8 @@
 
 A single-file 2D geometric-optics ray-tracing playground that runs entirely in the browser. Drag in optical elements, watch the rays trace in real time, and build your own optical setup.
 
+## 使用案例
+
 ![白光色散演示](demo.png)
 
 > 上图为白光经棱镜色散的演示，用户可自行在示例中进行编辑修改
@@ -50,9 +52,5 @@ A single-file 2D geometric-optics ray-tracing playground that runs entirely in t
 可通过 `https://charm-lord.github.io/RayBench/` 访问。
 
 ---
-
-## 作者
-
-wangcan · wangcan_ultra@hust.edu.cn
 
 若这个小工具帮到了你，欢迎点击界面右上角的「打赏」支持作者继续完善。
