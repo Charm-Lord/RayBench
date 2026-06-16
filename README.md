@@ -5,11 +5,20 @@
 A single-file 2D geometric-optics ray-tracing playground that runs entirely in the browser. Drag in optical elements, watch the rays trace in real time, and build your own optical setup.
 
 ## 使用案例
-
+1. 光的色散
 ![白光色散演示](demo.png)
 
-> 上图为白光经棱镜色散的演示，用户可自行在示例中进行编辑修改
+> 白光经棱镜色散，用户可自行对棱镜角度进行修改
 
+2. 双色光的合束
+![双色光合束](demo1.png)
+
+> 通过自定义元件，实现倍频晶体效果
+
+3. 玻璃折射
+![玻璃折射](demo2.png)
+
+> 可自定义玻璃折射率，探究反射折射的奥秘
 ---
 
 ## 使用说明
