@@ -11,12 +11,12 @@ A single-file 2D geometric-optics ray-tracing playground that runs entirely in t
 > 白光经棱镜色散，用户可自行对棱镜角度进行修改
 
 2. 双色光的合束
-![双色光合束](demo1.png)
+![双色光合束](demo2.png)
 
 > 通过自定义元件，实现倍频晶体效果
 
 3. 玻璃折射
-![玻璃折射](demo2.png)
+![玻璃折射](demo3.png)
 
 > 可自定义玻璃折射率，探究反射折射的奥秘
 ---
