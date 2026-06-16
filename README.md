@@ -6,7 +6,7 @@ A single-file 2D geometric-optics ray-tracing playground that runs entirely in t
 
 ![白光色散演示](demo.png)
 
-> 上图为白光经棱镜色散、再被反射镜偏转后展开成连续光谱的演示。
+> 上图为白光经棱镜色散的演示，用户可自行在示例中进行编辑修改
 
 ---
 
@@ -47,7 +47,7 @@ A single-file 2D geometric-optics ray-tracing playground that runs entirely in t
 
 ## 在线访问
 
-本项目为纯静态网页，可直接部署到 GitHub Pages。将文件命名为 `index.html` 上传到公开仓库，在仓库 Settings → Pages 中选择 `main` 分支与根目录保存，稍候即可通过 `https://<用户名>.github.io/<仓库名>/` 访问。
+可通过 `https://charm-lord.github.io/RayBench/` 访问。
 
 ---
 
