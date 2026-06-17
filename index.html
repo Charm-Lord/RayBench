@@ -206,7 +206,7 @@ body.light #rqseg button.on{color:#fff}
 <div id="app">
   <header>
     <div class="mark"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="9" cy="12" r="4.5" fill="none" stroke="#ffb454" stroke-width="2"/><path d="M13.5 12H22" stroke="#ffb454" stroke-width="2" stroke-linecap="round"/><path d="M2 12h2.5" stroke="#5c6c84" stroke-width="2" stroke-linecap="round"/></svg></div>
-    <div class="logo"><b>Optical<i>Board</i></b><span class="ver">ver 0.7</span><span data-i18n="tagline">光学面包板 · 模块化几何光路</span></div>
+    <div class="logo"><b>Ray<i>Bench</i></b><span class="ver">ver 0.6</span><span data-i18n="tagline">光学面包板 · 模块化几何光路</span></div>
     <div id="stat"></div>
     <div id="hbar">
       <div id="rqseg" data-i18n-title="rq" title="渲染精细度">
@@ -254,6 +254,7 @@ body.light #rqseg button.on{color:#fff}
           <button data-scene="lens" data-i18n="sc_lens">透镜聚焦</button>
           <button data-scene="michelson" data-i18n="sc_michelson">迈克尔逊干涉</button>
           <button data-scene="rainbow" data-i18n="sc_rainbow">光栅分光</button>
+          <button data-scene="gratingpair" data-i18n="sc_gratingpair">光栅对还原</button>
           <button data-scene="splitmerge" data-i18n="sc_splitmerge">二路分束合束</button>
           <button data-scene="telescope" data-i18n="sc_telescope">望远镜扩束</button>
           <button data-scene="prismsplit" data-i18n="sc_prismsplit">棱镜分光反射</button>
@@ -381,6 +382,7 @@ const I18N={
   // 场景名
   sc_lens:{zh:'透镜聚焦',en:'Lens focus'}, sc_michelson:{zh:'迈克尔逊干涉',en:'Michelson'},
   sc_rainbow:{zh:'光栅分光',en:'Grating'}, sc_splitmerge:{zh:'二路分束合束',en:'Mach-Zehnder'},
+  sc_gratingpair:{zh:'光栅对还原',en:'Grating pair'},
   sc_telescope:{zh:'望远镜扩束',en:'Telescope'}, sc_prismsplit:{zh:'棱镜分光反射',en:'Prism + mirror'},
   sc_glass:{zh:'棱镜与玻璃',en:'Prism & glass'}, sc_clear:{zh:'清空画布',en:'Clear'},
   sc_twocolor:{zh:'双色场分光演示',en:'Two-color field'},
@@ -415,6 +417,7 @@ const I18N={
   l_f:{zh:'焦距 f 格',en:'Focal f cell'}, l_ratio:{zh:'反射占比 %',en:'Reflect %'},
   l_base:{zh:'基准偏角 °',en:'Base angle °'}, l_disp:{zh:'色散率 °',en:'Dispersion °'},
   l_zero:{zh:'保留零级直透光',en:'Keep zero order'},
+  l_gd:{zh:'刻线密度',en:'Line density'}, l_zeroI:{zh:'零级占比 %',en:'Zero order %'},
   l_n:{zh:'折射率 n',en:'Index n'}, l_th:{zh:'厚度 格',en:'Thickness cell'},
   l_w2:{zh:'通光高度 格',en:'Aperture cell'}, l_dispS:{zh:'色散强度',en:'Dispersion'},
   l_size:{zh:'尺寸 格',en:'Size cell'}, l_gap:{zh:'缝宽 格',en:'Slit width cell'},
@@ -491,7 +494,7 @@ const ELEMS={
     defaults:()=>({rot:135,ratio:50}),
     icon:'<svg viewBox="0 0 36 36"><rect x="8.5" y="8.5" width="19" height="19" rx="2.5" stroke="#bcd0e8" fill="rgba(130,150,180,.12)" stroke-width="2"/><path d="M8.5 27.5L27.5 8.5" stroke="#e8eef7" stroke-width="2"/></svg>'},
   grating:{name:'衍射光栅',en:'Grating',half:.42,
-    defaults:()=>({rot:90,base:20,disp:10,zero:true}),
+    defaults:()=>({rot:90,gd:1.2,order:1,zero:true,zeroI:40}),
     icon:'<svg viewBox="0 0 36 36"><path d="M16 4v28" stroke="#c2a7ee" stroke-width="3" stroke-linecap="round"/><path d="M16 8h6M16 13h6M16 18h6M16 23h6M16 28h6" stroke="#c2a7ee" stroke-width="1.5"/></svg>'},
   screen:{name:'吸收屏',en:'Screen',half:.5,
     defaults:()=>({rot:0}),
@@ -686,13 +689,26 @@ function interact(r,S,pt,Q){
     return;
   }
   if(type==='grating'){
-    const ang=(P.base+P.disp*(r.lam-550)/100)*D2R;
-    if(P.zero){
-      go(rotv(r.d,ang),r.I*0.72,undefined,true);
-      go(r.d,r.I*0.28,undefined,true);
-    }else{
-      go(rotv(r.d,ang),r.I,undefined,true);
-    }
+    // 透射光栅方程：sinθ_out = sinθ_in + mλ/d，角度相对界面法线
+    // 切向分量即 sinθ。两块反向相同光栅可把 mλ/d 项抵消，从而还原光路
+    const sIn=dot(r.d,S.t);                      // 入射方向切向分量 = sinθ_in
+    // mλ/d 项：随波长线性变化（色散来源），gd 为刻线密度档位，整体缩放到可见角度
+    const shift=(P.gd||1.2)*(r.lam/550)*0.42;
+    const nside=dot(r.d,S.n)>=0?1:-1;            // 透射保持在入射的法向同侧
+    const mkDir=(sOut)=>{
+      const cOut=Math.sqrt(Math.max(0,1-sOut*sOut))*nside;
+      return norm(add(mul(S.t,sOut),mul(S.n,cOut)));
+    };
+    const m=P.order||1;
+    const sP=sIn+m*shift, sM=sIn-m*shift;        // 正负一级
+    const okP=Math.abs(sP)<=1, okM=Math.abs(sM)<=1;
+    const z=clamp((P.zeroI===undefined?40:P.zeroI)/100,0,1);
+    const keepZero=(P.zero!==false);
+    const diffN=(okP?1:0)+(okM?1:0);
+    if(keepZero)go(mkDir(sIn),r.I*z,undefined,true);            // 零级直透
+    const each=diffN?r.I*(1-(keepZero?z:0))/diffN:0;
+    if(okP)go(mkDir(sP),each,undefined,true);                   // +1 级
+    if(okM)go(mkDir(sM),each,undefined,true);                   // -1 级
     return;
   }
   if(type==='slit'){
@@ -750,6 +766,11 @@ function interact(r,S,pt,Q){
     else{const a=P.absTheta*D2R;d=v(Math.cos(a),Math.sin(a))}
     if(mainI>0.012)go(d,mainI,lam,recolor);
     if(reflI>0.012)go(sub(r.d,mul(S.n,2*dot(r.d,S.n))),reflI,lam,recolor);
+    // 能量透过率作为转换效率：未被转换的 (1-Tr) 部分以原波长直接穿过
+    if(recolor){
+      const leakI=r.I*(1-Tr);
+      if(leakI>0.012)go(r.d,leakI);
+    }
   }
 }
 
@@ -1646,9 +1667,9 @@ function renderProps(){
   }else if(e.type==='splitter'){
     range(tr('l_ratio'),'ratio',0,100,1);
   }else if(e.type==='grating'){
-    range(tr('l_base'),'base',-60,60,1);
-    range(tr('l_disp'),'disp',-30,30,1);
+    range(tr('l_gd'),'gd',0.2,3,0.05);
     check(tr('l_zero'),'zero');
+    if(P.zero!==false)range(tr('l_zeroI'),'zeroI',0,90,1);
   }else if(e.type==='plate'){
     range(tr('l_n'),'n',1,2.5,0.01);
     range(tr('l_th'),'th',0.05,1.5,0.01);
@@ -1701,11 +1722,16 @@ function scene(name){
     put(4,7,'screen',{rot:0});
   }else if(name==='rainbow'){
     put(1,2,'source',{rot:0,poly:true,width:4});
-    put(4,2,'grating',{rot:90,base:16,disp:9,zero:true});
+    put(4,2,'grating',{rot:90,gd:1.4,order:1,zero:true,zeroI:35});
     put(9,2,'screen',{rot:90});
     put(9,3,'screen',{rot:90});
     put(9,4,'screen',{rot:90});
     put(9,5,'screen',{rot:90});
+  }else if(name==='gratingpair'){
+    put(1,3,'source',{rot:0,lam:632,width:10,bri:2,poly:true});
+    put(3,3,'grating',{rot:140,gd:0.8,order:1,zero:false,zeroI:40});
+    put(5,4,'grating',{rot:140,gd:0.8,order:1,zero:false,zeroI:0,ox:0.17});
+    put(8,4,'screen',{rot:270});
   }else if(name==='splitmerge'){
     put(1,2,'source',{rot:0,lam:580,width:5});
     put(4,2,'splitter',{rot:45,ratio:50});
