@@ -56,7 +56,10 @@ header{
 #stat{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--dim);white-space:nowrap;letter-spacing:-.2px}
 main{flex:1;display:flex;min-height:0}
 #stage{flex:1;position:relative;min-width:0;background:var(--bg)}
-#cv{position:absolute;inset:0;touch-action:none;cursor:crosshair;display:block}
+#cv{position:absolute;inset:0;touch-action:none;cursor:default;display:block}
+#cv.c-grab{cursor:grab}
+#cv.c-grabbing{cursor:grabbing}
+#cv.c-place{cursor:copy}
 #hint{
   position:absolute;left:14px;bottom:14px;
   background:var(--chip);border:1px solid var(--line);
@@ -146,11 +149,17 @@ kbd{font-family:var(--mono);font-size:10.5px;background:var(--kbdbg);border:1px 
 #rqseg button:hover{color:var(--ink)}
 #rqseg button.on{background:var(--acc);color:#17120a;font-weight:600}
 body.light #rqseg button.on{color:#fff}
-#helpbox{position:absolute;right:14px;top:56px;z-index:60;width:300px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px 18px 16px;font-size:12px;color:var(--dim);line-height:2.1;box-shadow:var(--shadow);font-family:var(--hei)}
+#helpbox{position:absolute;right:14px;top:56px;z-index:60;width:308px;max-height:calc(100vh - 80px);overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 18px 16px;font-size:12px;color:var(--dim);line-height:1.6;box-shadow:var(--shadow);font-family:var(--hei)}
 #helpbox b{color:var(--ink);font-size:12.5px}
 .hcredit{margin-top:12px;padding-top:11px;border-top:1px solid var(--line);line-height:1.95}
 .hcredit a{color:var(--acc);text-decoration:none}
 .hcredit a:hover{text-decoration:underline}
+.htitle{font-size:13px;font-weight:600;color:var(--ink);font-family:var(--hei);margin-bottom:10px;letter-spacing:.3px}
+.hlist{list-style:none;counter-reset:hc;display:flex;flex-direction:column;gap:8px}
+.hlist li{counter-increment:hc;position:relative;padding-left:24px;line-height:1.6;color:var(--dim)}
+.hlist li::before{content:counter(hc);position:absolute;left:0;top:1px;width:17px;height:17px;border-radius:6px;background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--acc);font-family:var(--mono);font-size:10.5px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.hlist li a{color:var(--acc);text-decoration:none}
+.hlist li a:hover{text-decoration:underline}
 .hbtn.on{border-color:var(--acc);color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
 #expmask{position:fixed;inset:0;z-index:80;background:rgba(4,7,12,.62);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
 #expmask[hidden]{display:none}
@@ -197,7 +206,7 @@ body.light #rqseg button.on{color:#fff}
 <div id="app">
   <header>
     <div class="mark"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="9" cy="12" r="4.5" fill="none" stroke="#ffb454" stroke-width="2"/><path d="M13.5 12H22" stroke="#ffb454" stroke-width="2" stroke-linecap="round"/><path d="M2 12h2.5" stroke="#5c6c84" stroke-width="2" stroke-linecap="round"/></svg></div>
-    <div class="logo"><b>Ray<i>Bench</i></b><span class="ver">ver 0.6</span><span data-i18n="tagline">光学面包板 · 模块化几何光路</span></div>
+    <div class="logo"><b>Ray<i>Bench</i></b><span class="ver">ver 0.7</span><span data-i18n="tagline">光学面包板 · 模块化几何光路</span></div>
     <div id="stat"></div>
     <div id="hbar">
       <div id="rqseg" data-i18n-title="rq" title="渲染精细度">
@@ -262,33 +271,31 @@ body.light #rqseg button.on{color:#fff}
   </main>
   <div id="helpbox" hidden>
     <div id="helpzh" data-help="zh">
-      <b>操作指南</b><br>
-      拖动右侧元件图标到左侧即可放置<br>
-      右侧可编辑元件属性<br>
-      支持格内的水平垂直微调<br>
-      按住 <kbd>Shift</kbd> 点击可选中多个元件并组合<br>
-      顶栏可调渲染精细度：流畅档适合搭建，精细档适合导出<br>
-      顶栏可隐藏元件图标、切换主题、按需分辨率导出图片<br>
-      右侧配置存档可导出当前光路，下次加载即可复原<br>
-      快捷键 <kbd>R</kbd> 旋转 <kbd>Del</kbd> 删除 <kbd>Esc</kbd> 取消<br>
-      角度以屏幕 x 轴为起点，顺时针为正
-      详情界面见 https://github.com/Charm-Lord/RayBench
+      <div class="htitle">使用指南</div>
+      <ol class="hlist">
+        <li>拖动右侧元件图标到左侧即可放置</li>
+        <li>右栏可编辑元件属性，支持格内的水平垂直微调</li>
+        <li>按住 <kbd>Shift</kbd> 点击可选中多个元件并组合</li>
+        <li>顶栏可调渲染精细度</li>
+        <li>顶栏可隐藏元件、切换主题、导出图片</li>
+        <li>右栏可导出当前配置，下次加载配置即可复原光路</li>
+        <li>快捷键：<kbd>R</kbd> 旋转 <kbd>Del</kbd> 删除 <kbd>Esc</kbd> 取消 <kbd>Ctrl</kbd>+<kbd>C</kbd>/<kbd>V</kbd> 复制/粘贴</li>
+        <li>详情界面见 <a href="https://github.com/Charm-Lord/RayBench" target="_blank" rel="noopener">github.com/Charm-Lord/RayBench</a></li>
+      </ol>
       <div class="hcredit"><b>关于</b><br>作者 wangcan<br>联系 <a href="mailto:wangcan_ultra@hust.edu.cn">wangcan_ultra@hust.edu.cn</a><br>觉得好用可点右上角打赏支持</div>
     </div>
     <div id="helpen" data-help="en" hidden>
-      <b>How to use</b><br>
-      Drag an element icon onto the canvas to place it<br>
-      Click an element to edit its properties, drag sliders or type values<br>
-      Shift X / Y nudges an element within its cell, up to half a cell<br>
-      Hold <kbd>Shift</kbd> and click to select several elements and group them<br>
-      Mirror and concave mirror reflect on the front face only, the back absorbs<br>
-      Glass and prism obey Snell's law, the prism turns light by total internal reflection, the slit clips the beam<br>
-      The top bar sets render quality, Fast for building, Fine for export<br>
-      The top bar can hide elements, switch theme, and export at a chosen resolution<br>
-      Config on the right exports the current setup, load it later to restore<br>
-      Scroll to zoom · drag empty space to pan · pinch to zoom<br>
-      Keys <kbd>R</kbd> rotate <kbd>Del</kbd> delete <kbd>Esc</kbd> cancel<br>
-      Angles start from the screen x axis, clockwise positive
+      <div class="htitle">How to use</div>
+      <ol class="hlist">
+        <li>Drag an element icon from the right onto the canvas to place it</li>
+        <li>Edit element properties on the right, with fine in-cell X / Y nudging</li>
+        <li>Hold <kbd>Shift</kbd> and click to select several elements and group them</li>
+        <li>Adjust render quality from the top bar</li>
+        <li>Hide elements, switch theme, and export images from the top bar</li>
+        <li>Export the current config on the right, load it later to restore the setup</li>
+        <li>Keys: <kbd>R</kbd> rotate <kbd>Del</kbd> delete <kbd>Esc</kbd> cancel <kbd>Ctrl</kbd>+<kbd>C</kbd>/<kbd>V</kbd> copy/paste</li>
+        <li>Full details at <a href="https://github.com/Charm-Lord/RayBench" target="_blank" rel="noopener">github.com/Charm-Lord/RayBench</a></li>
+      </ol>
       <div class="hcredit"><b>About</b><br>Author wangcan<br>Contact <a href="mailto:wangcan_ultra@hust.edu.cn">wangcan_ultra@hust.edu.cn</a><br>If it helps, tap Tip at the top right</div>
     </div>
   </div>
@@ -398,6 +405,7 @@ const I18N={
   pPlacing:{zh:'放置模式已开启，点击工作区空格放下',en:'Placement mode on; click an empty cell to drop'},
   pEsc:{zh:'，按 Esc 取消',en:', press Esc to cancel'},
   pRot1:{zh:'+1°',en:'+1°'}, pRot90:{zh:'+90°',en:'+90°'}, pDel:{zh:'删除',en:'Delete'},
+  pCopy:{zh:'复制一份',en:'Duplicate'}, pCopyT:{zh:'复制选中元件（Ctrl+C 复制，Ctrl+V 粘贴）',en:'Duplicate selection (Ctrl+C copy, Ctrl+V paste)'},
   pRot1T:{zh:'精调旋转，每次 1 度',en:'Fine rotate, 1° per click'}, pRot90T:{zh:'旋转 90 度',en:'Rotate 90°'},
   // 属性标签
   l_rotOut:{zh:'出射方向 °',en:'Beam dir °'}, l_rot:{zh:'旋转角 °',en:'Rotation °'},
@@ -410,6 +418,9 @@ const I18N={
   l_n:{zh:'折射率 n',en:'Index n'}, l_th:{zh:'厚度 格',en:'Thickness cell'},
   l_w2:{zh:'通光高度 格',en:'Aperture cell'}, l_dispS:{zh:'色散强度',en:'Dispersion'},
   l_size:{zh:'尺寸 格',en:'Size cell'}, l_gap:{zh:'缝宽 格',en:'Slit width cell'},
+  l_defR:{zh:'默认反射率 %',en:'Default reflect %'},
+  l_b1on:{zh:'波段一',en:'Band 1'}, l_b2on:{zh:'波段二',en:'Band 2'}, l_b3on:{zh:'波段三',en:'Band 3'},
+  l_lo:{zh:'起始 nm',en:'From nm'}, l_hi:{zh:'截止 nm',en:'To nm'}, l_bR:{zh:'反射率 %',en:'Reflect %'},
   l_outMode:{zh:'出射方式',en:'Output mode'}, l_dTheta:{zh:'偏转量 °',en:'Deflect °'},
   l_absTheta:{zh:'出射角 °',en:'Exit angle °'}, l_lamMode:{zh:'波长变换',en:'Wavelength'},
   l_lamSet:{zh:'目标波长 nm',en:'Target nm'}, l_lamShift:{zh:'波长平移 nm',en:'Shift nm'},
@@ -494,6 +505,13 @@ const ELEMS={
   slit:{name:'狭缝光阑',en:'Slit',half:.5,
     defaults:()=>({rot:90,gap:0.25}),
     icon:'<svg viewBox="0 0 36 36"><rect x="6" y="4" width="9" height="28" rx="1.5" fill="#2b3442" stroke="#8fa3bf" stroke-width="1.6"/><rect x="21" y="4" width="9" height="28" rx="1.5" fill="#2b3442" stroke="#8fa3bf" stroke-width="1.6"/></svg>'},
+  dichroic:{name:'二向色镜',en:'Dichroic',half:.46,
+    defaults:()=>({rot:135,
+      b1on:true,b1lo:380,b1hi:500,b1r:90,
+      b2on:false,b2lo:500,b2hi:600,b2r:50,
+      b3on:false,b3lo:600,b3hi:780,b3r:10,
+      defR:10}),
+    icon:'<svg viewBox="0 0 36 36"><path d="M7 29L29 7" stroke="#5fd0ff" stroke-width="3" stroke-linecap="round"/><path d="M9 27L27 9" stroke="#ff7a7a" stroke-width="1.6" stroke-dasharray="2 3"/></svg>'},
   custom:{name:'自定义',en:'Custom',half:.46,
     defaults:()=>({rot:90,outMode:'rel',dTheta:30,absTheta:0,lamMode:'keep',lamSet:550,lamShift:0,trans:100,splitOn:false,splitRatio:30}),
     icon:'<svg viewBox="0 0 36 36"><rect x="6" y="6" width="24" height="24" rx="7" fill="none" stroke="#8b97ab" stroke-width="2" stroke-dasharray="4 3"/><text x="18" y="24.5" font-size="17" font-style="italic" font-family="Georgia,serif" fill="#dde6f2" text-anchor="middle">&#402;</text></svg>'}
@@ -592,8 +610,6 @@ function surfsOf(k,e){
   return [{c,t,n:nrm,half,e,surf:'main'}];
 }
 
-const POLY_LAMS=(()=>{const a=[];for(let w=395;w<=745;w+=10)a.push(w);return a})();
-
 function emit(k,e,Q){
   const P=e.props;
   const ang=(P.rot||0)*D2R;
@@ -604,17 +620,19 @@ function emit(k,e,Q){
   const wid=P.width;
   const bri=P.bri===undefined?1:P.bri;
   const apX=8;                         // 出光口在元件本地坐标的位置
+  // 渲染精细度联动光线密度：流畅档稀疏省负荷，精细档加密最好看
+  const polyStep=(RQ==='low'?20:(RQ==='high'?7:12));   // 复色光采样波长间隔 nm
+  const subSpace=(RQ==='low'?5:(RQ==='high'?2:3));      // 宽光束子光线间距 px
   if(P.poly){
     const start=add(c,mul(d,apX));
     const drawW=Math.max(2.5,wid*0.45);
-    for(let q=0;q<POLY_LAMS.length;q++){
-      Q.push({p:start,d,lam:POLY_LAMS[q],w:drawW,I:0.3*bri,gen:0,poly:true});
+    for(let w=395;w<=745;w+=polyStep){
+      Q.push({p:start,d,lam:w,w:drawW,I:0.3*bri,gen:0,poly:true});
     }
     return;
   }
   // 宽光束用一排平行子光线模拟，经过透镜会真实收束到焦点
-  const SUB=2.6;                       // 子光线间距（像素），越小越密
-  let K=Math.max(1,Math.round(wid/SUB));
+  let K=Math.max(1,Math.round(wid/subSpace));
   K=Math.min(K,150);                   // 上限，避免极宽光束拖慢
   const dw=K>1?wid/K:wid;
   const drawW=K>1?Math.min(3.2,dw*1.1):wid;
@@ -700,6 +718,17 @@ function interact(r,S,pt,Q){
     const rd=refract(r.d,S.n,eta);
     if(rd)go(rd,r.I*0.98,undefined,true);
     else go(reflect(r.d,S.n),r.I*0.98,undefined,true);   // 全反射（直角棱镜转向）
+    return;
+  }
+  if(type==='dichroic'){
+    // 按波段决定反射率，落在启用波段内取该波段反射率，否则取默认
+    let R=clamp((P.defR||0)/100,0,1);
+    const lam=r.lam;
+    if(P.b1on&&lam>=P.b1lo&&lam<=P.b1hi)R=clamp(P.b1r/100,0,1);
+    else if(P.b2on&&lam>=P.b2lo&&lam<=P.b2hi)R=clamp(P.b2r/100,0,1);
+    else if(P.b3on&&lam>=P.b3lo&&lam<=P.b3hi)R=clamp(P.b3r/100,0,1);
+    if(R>0.01)go(reflect(r.d,S.n),r.I*R,undefined,true);     // 反射分量
+    if(R<0.99)go(r.d,r.I*(1-R),undefined,true);              // 透射分量
     return;
   }
   if(type==='custom'){
@@ -930,11 +959,19 @@ function drawElem(k,e){
     ctx.fill();ctx.stroke();
     rr(ctx,halfGap,-5,(h-halfGap),10,2);     // 上片（局部 x 正侧）
     ctx.fill();ctx.stroke();
+  }else if(e.type==='dichroic'){
+    // 镀膜分色镜，用蓝红双色暗示选择性反射
+    const g=ctx.createLinearGradient(-h,0,h,0);
+    g.addColorStop(0,'#5fd0ff');g.addColorStop(0.5,'#bcd0e8');g.addColorStop(1,'#ff7a7a');
+    ctx.strokeStyle=g;
+    ctx.lineWidth=4;
+    ctx.beginPath();ctx.moveTo(-h,0);ctx.lineTo(h,0);ctx.stroke();
+    ctx.strokeStyle=css(T.light?{r:90,g:110,b:140}:{r:170,g:190,b:215},.5);
+    ctx.lineWidth=1.4;
+    ctx.beginPath();
+    for(let x=-h+6;x<=h-2;x+=11){ctx.moveTo(x,2.5);ctx.lineTo(x-5,8)}
+    ctx.stroke();
   }else if(e.type==='custom'){
-    ctx.strokeStyle=T.cust;
-    ctx.setLineDash([6,4]);
-    ctx.lineWidth=2;
-    rr(ctx,-31,-31,62,62,10);
     ctx.stroke();
     ctx.setLineDash([4,4]);
     ctx.strokeStyle=T.accSoft;
@@ -1153,6 +1190,10 @@ const ptrs=new Map();
 let gesture=null;
 let carry=null;
 
+function setCursor(state){
+  cv.classList.remove('c-grab','c-grabbing','c-place');
+  if(state)cv.classList.add(state);
+}
 cv.addEventListener('pointerdown',ev=>{
   cv.setPointerCapture(ev.pointerId);
   ptrs.set(ev.pointerId,evtPos(ev));
@@ -1165,6 +1206,11 @@ cv.addEventListener('pointerdown',ev=>{
   }
   const p=evtPos(ev);
   gesture={mode:'maybe',sx:p.x,sy:p.y,vx:view.x,vy:view.y};
+  if(!placing){
+    const cel=cellAt(p.x,p.y);
+    if(grid.has(key(cel[0],cel[1])))setCursor('c-grabbing'); // 按住元件，握紧
+    else setCursor('c-grabbing');                            // 按住空白拖动平移
+  }
 });
 
 cv.addEventListener('pointermove',ev=>{
@@ -1183,7 +1229,11 @@ cv.addEventListener('pointermove',ev=>{
     return;
   }
   if(!gesture){
-    if(placing){hoverCell=cellAt(p.x,p.y);needDraw=true}
+    if(placing){hoverCell=cellAt(p.x,p.y);setCursor('c-place');needDraw=true}
+    else{
+      const cel=cellAt(p.x,p.y);
+      setCursor(grid.has(key(cel[0],cel[1]))?'c-grab':null); // 悬停元件张开手，否则默认
+    }
     return;
   }
   if(gesture.mode==='maybe'){
@@ -1260,6 +1310,7 @@ function endPtr(ev){
     needTrace=true;renderProps();
   }
   gesture=null;
+  setCursor(placing?'c-place':null);
 }
 cv.addEventListener('pointerup',endPtr);
 cv.addEventListener('pointercancel',ev=>{
@@ -1270,6 +1321,7 @@ cv.addEventListener('pointercancel',ev=>{
     carry=null;needTrace=true;
   }
   gesture=null;hoverCell=null;needDraw=true;
+  setCursor(placing?'c-place':null);
 });
 
 /* ---------- 元件库 ---------- */
@@ -1277,6 +1329,7 @@ function clearArm(){
   placing=null;
   document.querySelectorAll('.pal.armed').forEach(x=>x.classList.remove('armed'));
   hint.textContent=(LANG==='en'?HINT0_EN:HINT0_ZH);
+  if(typeof setCursor==='function')setCursor(null);
 }
 function tryPlace(type,i,j){
   const k=key(i,j);
@@ -1348,10 +1401,66 @@ function buildPalette(){
 }
 
 /* ---------- 键盘 ---------- */
+/* ---------- 复制粘贴 ---------- */
+let clipboard=null;
+function copySelection(){
+  if(!selSet.size)return false;
+  const ks=[...selSet].filter(k=>grid.has(k));
+  if(!ks.length)return false;
+  // 以选区左上角为基准记录相对位置，组合关系用本地编号保留
+  let minI=Infinity,minJ=Infinity;
+  ks.forEach(k=>{const p=k.split(',');minI=Math.min(minI,+p[0]);minJ=Math.min(minJ,+p[1])});
+  clipboard=ks.map(k=>{
+    const p=k.split(','), e=grid.get(k);
+    return {di:(+p[0])-minI,dj:(+p[1])-minJ,type:e.type,
+            props:JSON.parse(JSON.stringify(e.props)),group:e.group||0};
+  });
+  return true;
+}
+function pasteClipboard(){
+  if(!clipboard||!clipboard.length)return;
+  // 找一个不与现有元件重叠的落点，从原位偏移一格开始尝试
+  let baseI=0,baseJ=0;
+  // 以当前视图中心附近为锚，再叠加偏移
+  for(let shift=1;shift<=40;shift++){
+    const oi=shift,oj=shift;
+    const free=clipboard.every(it=>!grid.has(key(baseI+it.di+oi,baseJ+it.dj+oj)));
+    if(free){baseI+=oi;baseJ+=oj;break}
+    if(shift===40){baseI+=1;baseJ+=1}
+  }
+  // 组合关系重映射到新的组编号
+  const groupMap={};
+  selSet=new Set();
+  clipboard.forEach(it=>{
+    const nk=key(baseI+it.di,baseJ+it.dj);
+    const e={type:it.type,props:JSON.parse(JSON.stringify(it.props))};
+    if(it.group){
+      if(!groupMap[it.group])groupMap[it.group]=GID++;
+      e.group=groupMap[it.group];
+    }
+    grid.set(nk,e);
+    selSet.add(nk);
+  });
+  needTrace=true;renderProps();
+}
+
 window.addEventListener('keydown',ev=>{
   const ae=document.activeElement;
   const tag=ae?ae.tagName:'';
   if(tag==='INPUT'||tag==='SELECT'||tag==='TEXTAREA')return;
+  const mod=ev.ctrlKey||ev.metaKey;
+  if(mod&&(ev.key==='c'||ev.key==='C')){
+    if(copySelection())ev.preventDefault();
+    return;
+  }
+  if(mod&&(ev.key==='v'||ev.key==='V')){
+    pasteClipboard();ev.preventDefault();
+    return;
+  }
+  if(mod&&(ev.key==='d'||ev.key==='D')){   // Ctrl+D 直接原地复制一份
+    if(copySelection()){pasteClipboard();ev.preventDefault()}
+    return;
+  }
   if(ev.key==='Escape'){
     if(placing){clearArm();renderProps();needDraw=true}
     else if(selSet.size){selSet.clear();renderProps();needDraw=true}
@@ -1403,6 +1512,10 @@ function renderProps(){
       }
       needDraw=true;renderProps();
     });
+    const bc=document.createElement('button');
+    bc.textContent=tr('pCopy');
+    bc.title=tr('pCopyT');
+    bc.addEventListener('click',()=>{if(copySelection())pasteClipboard()});
     const bd=document.createElement('button');
     bd.textContent=tr('pDelAll');
     bd.className='danger';
@@ -1411,7 +1524,7 @@ function renderProps(){
       selSet.clear();
       needTrace=true;renderProps();
     });
-    btns.append(bg,bd);
+    btns.append(bg,bc,bd);
     propsEl.appendChild(btns);
     const d=document.createElement('div');
     d.className='empty';
@@ -1505,6 +1618,14 @@ function renderProps(){
   bdel.addEventListener('click',()=>{grid.delete(k);selSet.clear();needTrace=true;renderProps()});
   btns.append(b1,b90,bdel);
   propsEl.appendChild(btns);
+  const crow=document.createElement('div');
+  crow.className='pbtns';
+  const bcopy=document.createElement('button');
+  bcopy.textContent=tr('pCopy');
+  bcopy.title=tr('pCopyT');
+  bcopy.addEventListener('click',()=>{if(copySelection())pasteClipboard()});
+  crow.append(bcopy);
+  propsEl.appendChild(crow);
 
   if(P.ox===undefined)P.ox=0;
   if(P.oy===undefined)P.oy=0;
@@ -1539,6 +1660,14 @@ function renderProps(){
     range(tr('l_dispS'),'disp',0,30,1);
   }else if(e.type==='slit'){
     range(tr('l_gap'),'gap',0.02,1,0.01);
+  }else if(e.type==='dichroic'){
+    range(tr('l_defR'),'defR',0,100,1);
+    check(tr('l_b1on'),'b1on');
+    if(P.b1on){range(tr('l_lo'),'b1lo',380,780,1);range(tr('l_hi'),'b1hi',380,780,1);range(tr('l_bR'),'b1r',0,100,1);}
+    check(tr('l_b2on'),'b2on');
+    if(P.b2on){range(tr('l_lo'),'b2lo',380,780,1);range(tr('l_hi'),'b2hi',380,780,1);range(tr('l_bR'),'b2r',0,100,1);}
+    check(tr('l_b3on'),'b3on');
+    if(P.b3on){range(tr('l_lo'),'b3lo',380,780,1);range(tr('l_hi'),'b3hi',380,780,1);range(tr('l_bR'),'b3r',0,100,1);}
   }else if(e.type==='custom'){
     select(tr('l_outMode'),'outMode',[['pass',tr('o_pass')],['mirror',tr('o_mirror')],['rel',tr('o_rel')],['abs',tr('o_abs')]]);
     if(P.outMode==='rel')range(tr('l_dTheta'),'dTheta',-180,180,1);
@@ -1693,7 +1822,7 @@ document.querySelectorAll('#rqseg button').forEach(b=>{
   b.addEventListener('click',()=>{
     RQ=b.dataset.rq;
     document.querySelectorAll('#rqseg button').forEach(x=>x.classList.toggle('on',x===b));
-    needDraw=true;
+    needTrace=true;
   });
 });
 
@@ -1746,10 +1875,12 @@ document.getElementById('expgo').addEventListener('click',()=>{
   RENDER_DPR=sc; RENDER_TRANSPARENT=expTrans.checked;
   RQ='high';
   if(expNoGrid.checked)showGrid=false;
+  trace();              // 高精度密集光线重新追迹
   draw();
   cv=liveCv; ctx=liveCtx;
   RENDER_DPR=null; RENDER_TRANSPARENT=false;
   showGrid=savedGrid; RQ=savedRQ;
+  needTrace=true;       // 恢复当前档位的光线密度
   needDraw=true;
   off.toBlob(bl=>{
     if(!bl)return;
