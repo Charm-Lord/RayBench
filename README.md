@@ -59,7 +59,7 @@ A single-file 2D geometric-optics ray-tracing playground that runs entirely in t
 
 ## 在线访问
 
-可通过 `https://charm-lord.github.io/RayBench/` 访问。
+可通过 `https://charm-lord.github.io/OpticalBoard/` 访问。
 
 ---
 
