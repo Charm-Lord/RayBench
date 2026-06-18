@@ -193,12 +193,14 @@ body.light #rqseg button.on{color:#fff}
 #tipdlg .thanks{font-family:var(--kai);font-size:12.5px;color:var(--dim);margin-top:14px;line-height:1.7}
 #tipclose{position:absolute;top:12px;right:14px;border:none;background:none;color:var(--dim);font-size:20px;line-height:1;cursor:pointer;padding:2px 4px;border-radius:8px}
 #tipclose:hover{color:var(--ink)}
-@media (max-width:860px){
-  main{flex-direction:column}
-  aside{width:100%;height:46%;border-left:none;border-top:1px solid var(--line)}
-  #palette{grid-template-columns:repeat(4,1fr)}
+/* 侧栏始终固定在右侧，按可用宽度分档收窄；浏览器无论放大多少都不会让它消失或跑到底部 */
+@media (max-width:980px){
+  aside{width:240px}
   .logo span:not(.ver){display:none}
   #hbar{margin-left:auto}
+}
+@media (max-width:720px){
+  aside{width:208px}
 }
 /* ---------- 3D 视图 ---------- */
 .d3btn.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 16%,var(--panel2));color:var(--acc)}
@@ -260,7 +262,7 @@ body.light #rqseg button.on{color:#fff}
     <div id="tipdlg">
       <button id="tipclose" data-i18n-title="tipClose" title="关闭">&times;</button>
       <h4 data-i18n="tipH">请作者喝杯咖啡</h4>
-      <div class="sub" data-i18n-html="tipSub">RayBench 由 wangcan 独立开发<br>若它帮到了你，欢迎扫码小额支持</div>
+      <div class="sub" data-i18n-html="tipSub">Optical Board 由 aCan 在AI辅助下开发<br>若它帮到了你，欢迎扫码小额支持</div>
       <div class="qrwrap"><img id="tipqr" data-i18n-alt="tipQrAlt" alt="作者收款码" src=""></div>
       <div class="thanks" data-i18n="tipThanks">每一份心意都会变成下一个版本的新功能</div>
     </div>
@@ -356,7 +358,7 @@ body.light #rqseg button.on{color:#fff}
         <li>快捷键：<kbd>R</kbd> 旋转 <kbd>Del</kbd> 删除 <kbd>Esc</kbd> 取消 <kbd>Ctrl</kbd>+<kbd>C</kbd>/<kbd>V</kbd> 复制/粘贴</li>
         <li>详情界面见 <a href="https://github.com/Charm-Lord/RayBench" target="_blank" rel="noopener">github.com/Charm-Lord/RayBench</a></li>
       </ol>
-      <div class="hcredit"><b>关于</b><br>作者 wangcan<br>联系 <a href="mailto:wangcan_ultra@hust.edu.cn">wangcan_ultra@hust.edu.cn</a><br>觉得好用可点右上角打赏支持</div>
+      <div class="hcredit"><b>关于</b><br>作者 aCan <br>联系 <a href="mailto:d202180082@hust.edu.cn">d202180082@hust.edu.cn</a><br>觉得好用可点右上角打赏支持</div>
     </div>
     <div id="helpen" data-help="en" hidden>
       <div class="htitle">How to use</div>
@@ -370,7 +372,7 @@ body.light #rqseg button.on{color:#fff}
         <li>Keys: <kbd>R</kbd> rotate <kbd>Del</kbd> delete <kbd>Esc</kbd> cancel <kbd>Ctrl</kbd>+<kbd>C</kbd>/<kbd>V</kbd> copy/paste</li>
         <li>Full details at <a href="https://github.com/Charm-Lord/RayBench" target="_blank" rel="noopener">github.com/Charm-Lord/RayBench</a></li>
       </ol>
-      <div class="hcredit"><b>About</b><br>Author wangcan<br>Contact <a href="mailto:wangcan_ultra@hust.edu.cn">wangcan_ultra@hust.edu.cn</a><br>If it helps, tap Tip at the top right</div>
+      <div class="hcredit"><b>About</b><br>Author aCan <br>Contact <a href="mailto:d202180082@hust.edu.cn">d202180082@hust.edu.cn</a><br>If it helps, tap Tip at the top right</div>
     </div>
   </div>
 </div>
@@ -461,7 +463,7 @@ const I18N={
   sc_twocolor:{zh:'双色场分光演示',en:'Two-color field'},
   // 打赏弹层
   tipH:{zh:'请作者喝杯咖啡',en:'Buy the author a coffee'},
-  tipSub:{zh:'RayBench 由 wangcan 独立开发<br>若它帮到了你，欢迎扫码小额支持',en:'RayBench is built solo by wangcan<br>if it helped you, a small tip is welcome'},
+  tipSub:{zh:'Optical Board 由 aCan 在AI辅助下开发<br>若它帮到了你，欢迎扫码小额支持',en:'Optical Board is built solo by aCan with AI <br>if it helped you, a small tip is welcome'},
   tipQrAlt:{zh:'作者收款码',en:'Author payment QR'},
   tipThanks:{zh:'每一份心意都会变成下一个版本的新功能',en:'Every bit of support becomes a new feature'},
   tipClose:{zh:'关闭',en:'Close'},
@@ -1097,8 +1099,14 @@ function drawElem(k,e){
 }
 
 function draw(){
-  const dpr=RENDER_DPR!=null?RENDER_DPR:(window.devicePixelRatio||1);
-  const W=cv.width/dpr, H=cv.height/dpr;
+  let dpr,W,H;
+  if(RENDER_DPR!=null){                 // 离屏导出：位图不上屏，沿用指定倍率
+    dpr=RENDER_DPR; W=cv.width/dpr; H=cv.height/dpr;
+  }else{                                // 屏幕渲染：用“位图像素 ÷ 当前 CSS 显示尺寸”作为有效缩放，
+    const r=cv.getBoundingClientRect(); // 浏览器任意缩放 / DPR 突变下都精确贴合显示框，杜绝点击错位
+    W=r.width||cv.width; H=r.height||cv.height;
+    dpr=cv.width/W;
+  }
   ctx.setTransform(dpr,0,0,dpr,0,0);
   if(RENDER_TRANSPARENT){
     ctx.clearRect(0,0,W,H);
@@ -2046,9 +2054,16 @@ function resize(){
   const dpr=window.devicePixelRatio||1;
   cv.width=Math.max(1,Math.round(r.width*dpr));
   cv.height=Math.max(1,Math.round(r.height*dpr));
+  cv.style.width=r.width+'px';      // 关键：canvas 是 replaced 元素，inset:0 不会拉伸它；
+  cv.style.height=r.height+'px';    // 不显式锁定 CSS 尺寸，高 DPR 下会用位图尺寸撑破布局、盖住右侧栏
   needDraw=true;
 }
 new ResizeObserver(resize).observe(stage);
+// 页面缩放(Ctrl+±)会改变 devicePixelRatio：主动监听并重算位图分辨率，保证清晰且命中精确
+(function watchDPR(){
+  try{matchMedia('(resolution:'+(window.devicePixelRatio||1)+'dppx)')
+    .addEventListener('change',function(){resize();watchDPR();},{once:true});}catch(e){}
+})();
 
 function frame(){
   if(needTrace){needTrace=false;trace();needDraw=true}
