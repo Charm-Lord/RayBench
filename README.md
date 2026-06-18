@@ -5,6 +5,7 @@
 
 A geometric optics tracing simulator that runs directly in your browser.
 A dozen or so optical components are available for you to use, allowing you to trace rays in real time, convert them to 3D models with a single click, and build your own optical system.
+
 ---
 ## 亮点
 
