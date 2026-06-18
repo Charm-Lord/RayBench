@@ -200,13 +200,45 @@ body.light #rqseg button.on{color:#fff}
   .logo span:not(.ver){display:none}
   #hbar{margin-left:auto}
 }
+/* ---------- 3D 视图 ---------- */
+.d3btn.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 16%,var(--panel2));color:var(--acc)}
+#three{position:absolute;inset:0;display:none;z-index:5}
+#three canvas{display:block;width:100%;height:100%;outline:none}
+#d3loading{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:7;
+  color:var(--dim);font-size:13px;font-family:var(--hei);background:color-mix(in srgb,var(--bg) 65%,transparent)}
+#d3loading.on{display:flex}
+#d3panel{position:absolute;top:14px;right:14px;z-index:6;display:none;flex-direction:column;gap:10px;
+  width:198px;padding:13px 15px 14px;border-radius:14px;background:color-mix(in srgb,var(--panel) 88%,transparent);
+  border:1px solid var(--line);box-shadow:var(--shadow);font-size:12.5px;color:var(--dim);
+  font-family:var(--hei);backdrop-filter:blur(10px);max-height:calc(100% - 28px);overflow-y:auto}
+#d3panel select{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:7px;
+  padding:3px 6px;font-family:var(--hei);font-size:12px;cursor:pointer}
+#d3panel.on{display:flex}
+#d3panel .ph{font-size:10.5px;letter-spacing:1.5px;font-weight:600;color:var(--dim);margin-top:3px}
+#d3panel .ph:first-child{margin-top:0}
+#d3panel label{display:flex;flex-direction:column;gap:6px;font-size:12px}
+#d3panel label.row{flex-direction:row;align-items:center;justify-content:space-between;cursor:pointer}
+#d3panel input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
+#d3panel input[type=checkbox]{accent-color:var(--acc);width:15px;height:15px;cursor:pointer}
+#d3panel .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+#d3panel .seg button{flex:1;border:none;border-right:1px solid var(--line);background:var(--panel2);color:var(--dim);
+  font-size:11.5px;padding:6px 0;cursor:pointer;font-family:var(--hei);transition:.12s}
+#d3panel .seg button:last-child{border-right:none}
+#d3panel .seg button.on{background:color-mix(in srgb,var(--acc) 18%,transparent);color:var(--acc)}
+#d3panel .d3row2{display:flex;gap:8px;align-items:center}
+#d3panel .d3row2 .pbtn{flex:1}
+#d3panel .d3row2 label.row{flex:0 0 auto;gap:6px}
+#d3panel .pbtn{padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);
+  color:var(--ink);font-size:12px;cursor:pointer;font-family:var(--hei);transition:.12s}
+#d3panel .pbtn:hover{border-color:var(--acc);color:var(--acc)}
+#d3panel .pbtn.full{width:100%;margin-top:2px}
 </style>
 </head>
 <body>
 <div id="app">
   <header>
     <div class="mark"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="9" cy="12" r="4.5" fill="none" stroke="#ffb454" stroke-width="2"/><path d="M13.5 12H22" stroke="#ffb454" stroke-width="2" stroke-linecap="round"/><path d="M2 12h2.5" stroke="#5c6c84" stroke-width="2" stroke-linecap="round"/></svg></div>
-    <div class="logo"><b>Optical<i>Board</i></b><span class="ver">ver 0.7</span><span data-i18n="tagline">光学面包板 · 模块化几何光路</span></div>
+    <div class="logo"><b>Optical<i>Board</i></b><span class="ver">ver 0.9</span><span data-i18n="tagline">光学面包板 · 模块化几何光路</span></div>
     <div id="stat"></div>
     <div id="hbar">
       <div id="rqseg" data-i18n-title="rq" title="渲染精细度">
@@ -216,6 +248,7 @@ body.light #rqseg button.on{color:#fff}
       </div>
       <button id="tghide" class="hbtn" data-i18n-title="hideTitle" title="隐藏元件图标">&#128065;&#xfe0e;</button>
       <button id="exportbtn" class="hbtn wide" data-i18n="exportBtn" data-i18n-title="exportTitle" title="将当前画面导出为 PNG 图片">导出图片</button>
+      <button id="d3btn" class="hbtn wide d3btn" data-i18n="d3Btn" data-i18n-title="d3Title" title="切换 3D 视图">3D</button>
       <button id="tgtheme" class="hbtn" title="切换主题">&#9728;&#xfe0e;</button>
       <button id="helpbtn" class="hbtn" data-i18n-title="helpTitle" title="帮助">?</button>
       <button id="langbtn" class="hbtn" data-i18n-title="langTitle" title="Switch to English">EN</button>
@@ -240,6 +273,44 @@ body.light #rqseg button.on{color:#fff}
         <button id="zout" data-i18n-title="zoomOut" title="缩小">−</button>
         <button id="zfit" data-i18n-title="zoomFit" title="适配视图">⌖</button>
         <button id="zgrid" data-i18n-title="gridHide" title="隐藏网格">&#9638;</button>
+      </div>
+      <div id="three"></div>
+      <div id="d3loading"><span data-i18n="d3Loading">正在加载 3D…</span></div>
+      <div id="d3panel">
+        <div class="ph" data-i18n="d3View">视角</div>
+        <div class="seg" id="d3proj">
+          <button data-proj="persp" class="on" data-i18n="d3Persp">透视</button>
+          <button data-proj="ortho" data-i18n="d3Ortho">正交</button>
+        </div>
+        <label><span data-i18n="d3Zoom">缩放</span><input id="d3zoom" type="range" min="0.4" max="2.6" step="0.02" value="1"></label>
+        <div class="seg" id="d3presets">
+          <button data-view="iso" data-i18n="d3Iso">等轴</button>
+          <button data-view="top" data-i18n="d3Top">俯视</button>
+          <button data-view="front" data-i18n="d3Front">正视</button>
+        </div>
+        <div class="d3row2">
+          <button class="pbtn" id="d3reset" data-i18n="d3Reset">重置视角</button>
+          <label class="row"><span data-i18n="d3Spin">自转</span><input id="d3spin" type="checkbox"></label>
+        </div>
+        <div class="ph" data-i18n="d3Scene">场景</div>
+        <label class="row"><span data-i18n="d3Night">夜间</span><input id="d3night" type="checkbox"></label>
+        <label class="row"><span data-i18n="d3Board">面包板</span><input id="d3board" type="checkbox" checked></label>
+        <div class="seg" id="d3light">
+          <button data-light="area" class="on" data-i18n="d3Area">面光源</button>
+          <button data-light="point" data-i18n="d3Point">点光源</button>
+        </div>
+        <label><span data-i18n="d3Bri">环境亮度</span><input id="d3bri" type="range" min="0" max="3" step="0.05" value="0.95"></label>
+        <label><span data-i18n="d3Bloom">光束辉光</span><input id="d3bloom" type="range" min="0" max="2" step="0.05" value="0.75"></label>
+        <div class="ph" data-i18n="d3Quality">渲染</div>
+        <div class="seg" id="d3quality">
+          <button data-q="low" data-i18n="rqLow">流畅</button>
+          <button data-q="med" class="on" data-i18n="rqMed">标准</button>
+          <button data-q="high" data-i18n="rqHigh">精细</button>
+        </div>
+        <label class="row"><span data-i18n="d3ExpRes">导出倍率</span>
+          <select id="d3expscale"><option value="1">1×</option><option value="2" selected>2×</option><option value="3">3×</option><option value="4">4×</option></select>
+        </label>
+        <button class="pbtn full" id="d3export" data-i18n="d3Export">导出图片</button>
       </div>
     </div>
     <aside>
@@ -435,7 +506,21 @@ const I18N={
   // 提示文案
   cfgErr:{zh:'配置文件无法读取，请确认是 RayBench 导出的 JSON',en:'Could not read the file; make sure it is a RayBench JSON export'},
   placeHint:{zh:'点击工作区空格放置',en:'Click an empty cell to place'}, placeEsc:{zh:' · 按 Esc 取消',en:' · Esc to cancel'},
-  statEl:{zh:'元件',en:'Elements'}, statRay:{zh:'光线段',en:'Rays'}
+  statEl:{zh:'元件',en:'Elements'}, statRay:{zh:'光线段',en:'Rays'},
+  // 3D 视图
+  d3Btn:{zh:'3D',en:'3D'}, d3Title:{zh:'切换 3D 视图',en:'Toggle 3D view'},
+  d3Back:{zh:'2D',en:'2D'}, d3BackTitle:{zh:'返回 2D 编辑',en:'Back to 2D'},
+  d3Loading:{zh:'正在加载 3D…',en:'Loading 3D…'},
+  d3Fail:{zh:'3D 加载失败（需要联网）',en:'3D failed to load (needs internet)'},
+  d3View:{zh:'视角',en:'VIEW'}, d3Scene:{zh:'场景',en:'SCENE'},
+  d3Persp:{zh:'透视',en:'Persp'}, d3Ortho:{zh:'正交',en:'Ortho'}, d3Zoom:{zh:'缩放',en:'Zoom'},
+  d3Iso:{zh:'等轴',en:'Iso'}, d3Top:{zh:'俯视',en:'Top'}, d3Front:{zh:'正视',en:'Front'},
+  d3Reset:{zh:'重置视角',en:'Reset'}, d3Spin:{zh:'自转',en:'Spin'},
+  d3Night:{zh:'夜间',en:'Night'}, d3Board:{zh:'面包板',en:'Board'},
+  d3Bri:{zh:'环境亮度',en:'Ambient'}, d3Bloom:{zh:'光束辉光',en:'Glow'},
+  d3Light:{zh:'光源',en:'Light'}, d3Area:{zh:'面光源',en:'Area'}, d3Point:{zh:'点光源',en:'Point'},
+  d3Quality:{zh:'渲染',en:'Render'}, d3ExpRes:{zh:'导出倍率',en:'Export ×'},
+  d3Export:{zh:'导出图片',en:'Export PNG'}
 };
 function tr(id){const e=I18N[id];return e?(e[LANG]||e.zh):id}
 
@@ -2013,6 +2098,491 @@ scene('prismsplit');
 renderProps();
 requestAnimationFrame(frame);
 
+/* ---------- 桥接：把 2D 引擎句柄暴露给 3D 模块（2D 逻辑零改动） ---------- */
+window.OB={
+  trace, wlRGB, grid, ELEMS, CELL,
+  getSEGS:()=>SEGS, getHITS:()=>HITS,
+  getLight:()=>!!T.light,
+  tr:(k)=>tr(k)
+};
+
+</script>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+/* ============================================================
+   OpticalBoard 3D —— 一键 2D→3D 浏览（只读），复用 2D 引擎
+   ============================================================ */
+const OB=window.OB;
+const $=id=>document.getElementById(id);
+const D2R=Math.PI/180, CELL=OB.CELL;
+const BEAMY=0.5, HEL=0.7;          // 光束高度 / 元件统一高度
+
+// three.js 句柄（首次进入 3D 时懒加载）
+let THREE,OrbitControls,EffectComposer,RenderPass,UnrealBloomPass,OutputPass,RoomEnvironment,RectAreaLightUniformsLib;
+let loaded=false,loadingPromise=null;
+async function loadThree(){
+  if(loaded)return true;
+  if(loadingPromise)return loadingPromise;
+  loadingPromise=(async()=>{
+    THREE=await import('three');
+    OrbitControls=(await import('three/addons/controls/OrbitControls.js')).OrbitControls;
+    EffectComposer=(await import('three/addons/postprocessing/EffectComposer.js')).EffectComposer;
+    RenderPass=(await import('three/addons/postprocessing/RenderPass.js')).RenderPass;
+    UnrealBloomPass=(await import('three/addons/postprocessing/UnrealBloomPass.js')).UnrealBloomPass;
+    OutputPass=(await import('three/addons/postprocessing/OutputPass.js')).OutputPass;
+    RoomEnvironment=(await import('three/addons/environments/RoomEnvironment.js')).RoomEnvironment;
+    RectAreaLightUniformsLib=(await import('three/addons/lights/RectAreaLightUniformsLib.js')).RectAreaLightUniformsLib;
+    loaded=true;return true;
+  })();
+  return loadingPromise;
+}
+
+let renderer,scene3,cam,controls,composer,renderPass,bloomPass;
+let uniformLight,hemiLight,keyLight,fillLight,areaLight,pointLight,envTex;
+let sceneRoot=null,boardMesh=null;
+let centerCi=0,centerCj=0,fitRadius=6;
+let d3on=false,rafId=0,projMode='persp',isNight=true,lightType='area',qLevel='med';
+const three=$('three');
+
+/* ---------- 颜色/几何工具 ---------- */
+const wl=lam=>{const c=OB.wlRGB(lam);return new THREE.Color(c.r/255,c.g/255,c.b/255);};
+const P3=(p,y)=>new THREE.Vector3(p.x/CELL-centerCi,y,p.y/CELL-centerCj);
+
+/* ---------- 材质（懒建，依赖 THREE） ---------- */
+let MAT=null;
+function buildMaterials(){
+  MAT={
+    mirror:new THREE.MeshStandardMaterial({color:0xeef3fb,metalness:1,roughness:0.16,envMapIntensity:0.6}),
+    glass:new THREE.MeshPhysicalMaterial({color:0xeaf4ff,metalness:0,roughness:0.09,transmission:1,ior:1.52,
+      thickness:0.5,clearcoat:0.6,clearcoatRoughness:0.18,attenuationColor:new THREE.Color(0x8fc4ff),
+      attenuationDistance:3.0,envMapIntensity:0.6,transparent:true,side:THREE.DoubleSide}),
+    splitter:new THREE.MeshPhysicalMaterial({color:0xcfe0f2,metalness:0.12,roughness:0.13,transmission:0.6,
+      ior:1.5,thickness:0.08,clearcoat:0.45,clearcoatRoughness:0.2,envMapIntensity:0.7,transparent:true,side:THREE.DoubleSide}),
+    dark:new THREE.MeshStandardMaterial({color:0x1d242f,metalness:0.25,roughness:0.78}),
+    body:new THREE.MeshStandardMaterial({color:0x141b26,metalness:0.6,roughness:0.4}),
+    metalMount:new THREE.MeshStandardMaterial({color:0x2b3442,metalness:0.55,roughness:0.55})
+  };
+}
+
+/* ---------- 元件 3D 模型（仅本体，悬于光束高度） ---------- */
+function placeByBasis(mesh,c,t,nrm,y){
+  const T=new THREE.Vector3(t.x,0,t.y).normalize();
+  const N=new THREE.Vector3(nrm.x,0,nrm.y).normalize();
+  const Y=new THREE.Vector3(0,1,0);
+  const m=new THREE.Matrix4().makeBasis(T,Y,N);
+  m.setPosition(c.x/CELL-centerCi,y,c.y/CELL-centerCj);
+  mesh.matrixAutoUpdate=false;mesh.matrix.copy(m);mesh.matrixWorldNeedsUpdate=true;
+  return mesh;
+}
+// 双凸/双凹透镜剖面（绕光轴 Lathe 旋成），rotateX 后光轴=局部 Z=法向
+function lensGeo(R,tc,te,convex){
+  const N=16,pts=[];
+  const half=r=>{const f=(r/R)*(r/R);return convex?(te/2+(tc/2-te/2)*(1-f)):(tc/2+(te/2-tc/2)*f);};
+  for(let i=0;i<=N;i++){const r=R*i/N;pts.push(new THREE.Vector2(r,half(r)));}
+  for(let i=N;i>=0;i--){const r=R*i/N;pts.push(new THREE.Vector2(r,-half(r)));}
+  const g=new THREE.LatheGeometry(pts,48);g.rotateX(Math.PI/2);return g;
+}
+// 凹面镜剖面：前凹球面 + 平背
+function dishGeo(R,depth,base){
+  const N=14,pts=[];
+  for(let i=0;i<=N;i++){const r=R*i/N;pts.push(new THREE.Vector2(r,depth*(r/R)*(r/R)));}
+  for(let i=N;i>=0;i--){const r=R*i/N;pts.push(new THREE.Vector2(r,-base));}
+  const g=new THREE.LatheGeometry(pts,44);g.rotateX(Math.PI/2);return g;
+}
+function makeOptic(k,e){
+  const p=k.split(',');
+  const c={x:(+p[0]+.5+(e.props.ox||0))*CELL,y:(+p[1]+.5+(e.props.oy||0))*CELL};
+  let ang=(e.props.rot||0)*D2R; if(e.type==='source')ang+=Math.PI/2;
+  const t={x:Math.cos(ang),y:Math.sin(ang)}, nrm={x:-t.y,y:t.x};
+  const hf=(OB.ELEMS[e.type]?OB.ELEMS[e.type].half:0.45), type=e.type;
+  const R1=HEL/2;   // Ø1" 标准通光半径
+
+  // 平面镜：圆形镜片 + 暗色金属边框
+  if(type==='mirror'){
+    const g=new THREE.Group();
+    const disc=new THREE.Mesh(new THREE.CylinderGeometry(R1,R1,0.05,40),MAT.mirror);
+    disc.rotation.x=Math.PI/2; g.add(disc);
+    g.add(new THREE.Mesh(new THREE.TorusGeometry(R1,0.026,10,44),MAT.metalMount));
+    return placeByBasis(g,c,t,nrm,BEAMY);
+  }
+  // 凹面镜：凹球面反射 + 边框
+  if(type==='cmirror'){
+    const g=new THREE.Group();
+    g.add(new THREE.Mesh(dishGeo(R1,0.09,0.05),MAT.mirror));
+    g.add(new THREE.Mesh(new THREE.TorusGeometry(R1,0.026,10,44),MAT.metalMount));
+    return placeByBasis(g,c,t,nrm,BEAMY);
+  }
+  // 凸/凹透镜：真实双凸/双凹玻璃 + 金属夹持环
+  if(type==='lensCX'||type==='lensCV'){
+    const g=new THREE.Group();
+    const lens=new THREE.Mesh(type==='lensCX'?lensGeo(R1,0.22,0.05,true):lensGeo(R1,0.05,0.24,false),MAT.glass);
+    g.add(lens);
+    g.add(new THREE.Mesh(new THREE.TorusGeometry(R1+0.01,0.032,12,44),MAT.metalMount));
+    return placeByBasis(g,c,t,nrm,BEAMY);
+  }
+  if(type==='splitter'){
+    const m=new THREE.Mesh(new THREE.BoxGeometry(hf*2,HEL,0.05),MAT.splitter);
+    return placeByBasis(m,c,t,nrm,BEAMY);
+  }
+  if(type==='dichroic'){
+    const m=new THREE.Mesh(new THREE.BoxGeometry(hf*2,HEL,0.05),
+      new THREE.MeshPhysicalMaterial({color:0x67d0c0,metalness:0.3,roughness:0.18,transmission:0.5,
+        ior:1.5,thickness:0.08,transparent:true,side:THREE.DoubleSide,envMapIntensity:0.7}));
+    return placeByBasis(m,c,t,nrm,BEAMY);
+  }
+  if(type==='grating'){
+    const mat=new THREE.MeshStandardMaterial({color:0x7b4fc0,metalness:0.5,roughness:0.4,emissive:0x2a1448,emissiveIntensity:0.45});
+    const m=new THREE.Mesh(new THREE.BoxGeometry(hf*2,HEL,0.05),mat);
+    placeByBasis(m,c,t,nrm,BEAMY);
+    const n=16;
+    for(let q=0;q<n;q++){
+      const lg=new THREE.Mesh(new THREE.BoxGeometry(hf*2,HEL/n*0.45,0.052),
+        new THREE.MeshStandardMaterial({color:0xc2a7ee,emissive:0x6a4ba0,emissiveIntensity:0.6}));
+      lg.position.y=-HEL/2+HEL*(q+0.5)/n; m.add(lg);
+    }
+    return m;
+  }
+  // 吸收屏 / 光阱：金属框 + 哑光黑吸收面
+  if(type==='screen'){
+    const g=new THREE.Group();
+    g.add(new THREE.Mesh(new THREE.BoxGeometry(hf*2,HEL,0.06),MAT.metalMount));
+    g.add(new THREE.Mesh(new THREE.BoxGeometry(hf*2-0.1,HEL-0.1,0.075),
+      new THREE.MeshStandardMaterial({color:0x0b0f15,metalness:0.05,roughness:0.96})));
+    return placeByBasis(g,c,t,nrm,BEAMY);
+  }
+  if(type==='plate'){
+    const w2=(e.props.w2||0.85), th=(e.props.th||0.3);
+    const m=new THREE.Mesh(new THREE.BoxGeometry(w2,HEL,th),MAT.glass);
+    return placeByBasis(m,c,t,nrm,BEAMY);
+  }
+  if(type==='slit'){
+    const grp=new THREE.Group();
+    const gap=(e.props.gap||0.25), seg=(hf*2-gap)/2;
+    [-(gap/2+seg/2),(gap/2+seg/2)].forEach(off=>{
+      const bx=new THREE.Mesh(new THREE.BoxGeometry(seg,HEL,0.06),MAT.metalMount);
+      bx.position.x=off; grp.add(bx);
+    });
+    return placeByBasis(grp,c,t,nrm,BEAMY);
+  }
+  if(type==='prism'){
+    const L=(e.props.size||0.8);
+    const sh=new THREE.Shape();
+    sh.moveTo(-L/2,L/2);sh.lineTo(L/2,L/2);sh.lineTo(-L/2,-L/2);sh.closePath();
+    const geo=new THREE.ExtrudeGeometry(sh,{depth:HEL,bevelEnabled:false});
+    // shape 的 y 轴需对齐世界法向 nrm（与 2D surfsOf 一致），故绕 X 轴 +90°；
+    // 用 -90° 会把法向取反，导致不对称的棱镜被镜像、与 2D 位置对不上
+    geo.translate(0,0,-HEL/2);geo.rotateX(Math.PI/2);
+    const m=new THREE.Mesh(geo,MAT.glass);
+    return placeByBasis(m,c,t,nrm,BEAMY);
+  }
+  // 激光源：阳极氧化激光头 + 散热齿 + 收口 + 发光出光孔（出射沿 -Z）
+  if(type==='source'){
+    const g=new THREE.Group();
+    const bodyMat=new THREE.MeshStandardMaterial({color:0x232a36,metalness:0.72,roughness:0.33});
+    const finMat=new THREE.MeshStandardMaterial({color:0x39414e,metalness:0.6,roughness:0.45});
+    const body=new THREE.Mesh(new THREE.CylinderGeometry(0.17,0.17,0.5,28),bodyMat);
+    body.rotation.x=Math.PI/2; body.position.z=0.07; g.add(body);
+    const nose=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.17,0.16,28),bodyMat);
+    nose.rotation.x=Math.PI/2; nose.position.z=-0.27; g.add(nose);
+    for(let i=0;i<5;i++){
+      const fin=new THREE.Mesh(new THREE.CylinderGeometry(0.205,0.205,0.014,24),finMat);
+      fin.rotation.x=Math.PI/2; fin.position.z=0.0+i*0.05; g.add(fin);
+    }
+    const col=e.props.poly?new THREE.Color(1,0.98,0.94):wl(e.props.lam);
+    const ap=new THREE.Mesh(new THREE.CylinderGeometry(0.062,0.062,0.012,24),
+      new THREE.MeshBasicMaterial({color:col}));
+    ap.rotation.x=Math.PI/2; ap.position.z=-0.355; g.add(ap);
+    return placeByBasis(g,c,t,nrm,BEAMY);
+  }
+  // 自定义：深色模块盒 + 强调色条
+  const g=new THREE.Group();
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(hf*1.7,HEL*0.92,0.2),
+    new THREE.MeshStandardMaterial({color:0x3a4250,metalness:0.5,roughness:0.5})));
+  const stripe=new THREE.Mesh(new THREE.BoxGeometry(hf*1.7,0.08,0.205),
+    new THREE.MeshStandardMaterial({color:0xffb454,emissive:0x6a4410,emissiveIntensity:0.4}));
+  stripe.position.y=HEL*0.28; g.add(stripe);
+  return placeByBasis(g,c,t,nrm,BEAMY);
+}
+
+function makeHoleTexture(){
+  const s=64,cvs=document.createElement('canvas');cvs.width=cvs.height=s;
+  const g=cvs.getContext('2d');
+  g.fillStyle='#39414f';g.fillRect(0,0,s,s);
+  g.fillStyle='#20262f';g.beginPath();g.arc(s/2,s/2,s*0.16,0,Math.PI*2);g.fill();
+  g.fillStyle='#0d1116';g.beginPath();g.arc(s/2,s/2,s*0.1,0,Math.PI*2);g.fill();
+  const tx=new THREE.CanvasTexture(cvs);tx.wrapS=tx.wrapT=THREE.RepeatWrapping;return tx;
+}
+
+function gridBounds(){
+  let minI=1e9,minJ=1e9,maxI=-1e9,maxJ=-1e9,n=0;
+  for(const kk of OB.grid.keys()){const pp=kk.split(',');const i=+pp[0],j=+pp[1];
+    minI=Math.min(minI,i);maxI=Math.max(maxI,i);minJ=Math.min(minJ,j);maxJ=Math.max(maxJ,j);n++;}
+  if(!n)return{minI:-3,minJ:-3,maxI:3,maxJ:3};
+  return{minI,minJ,maxI,maxJ};
+}
+
+/* ---------- 构建 3D 场景 ---------- */
+function build3D(){
+  OB.trace();
+  const SEGS=OB.getSEGS(), HITS=OB.getHITS();
+  const b=gridBounds();
+  centerCi=(b.minI+b.maxI+1)/2; centerCj=(b.minJ+b.maxJ+1)/2;
+  if(sceneRoot){scene3.remove(sceneRoot);sceneRoot.traverse(o=>{if(o.geometry)o.geometry.dispose();});}
+  sceneRoot=new THREE.Group(); scene3.add(sceneRoot);
+
+  const padW=(b.maxI-b.minI+1)+4, padD=(b.maxJ-b.minJ+1)+4;
+  const tex=makeHoleTexture(); tex.repeat.set(padW,padD);
+  boardMesh=new THREE.Mesh(new THREE.BoxGeometry(padW,0.3,padD),
+    new THREE.MeshStandardMaterial({map:tex,color:isNight?0x3a4150:0x6b7686,metalness:0.7,roughness:0.5}));
+  boardMesh.position.set(0,-0.15,0);
+  boardMesh.visible=$('d3board').checked;
+  sceneRoot.add(boardMesh);
+
+  for(const [k,e] of OB.grid) sceneRoot.add(makeOptic(k,e));
+
+  // 光束：圆柱体（InstancedMesh 单批绘制，加性混合 + Bloom 发光）
+  const maxLen=Math.hypot(padW,padD)*1.4*CELL;
+  const segs=[];
+  for(const sg of SEGS){
+    let a=sg.a,bb=sg.b;
+    const dx=bb.x-a.x,dy=bb.y-a.y,len=Math.hypot(dx,dy);
+    if(len>maxLen){const s=maxLen/len;bb={x:a.x+dx*s,y:a.y+dy*s};}
+    segs.push({A:P3(a,BEAMY),B:P3(bb,BEAMY),
+      c:sg.poly?new THREE.Color(1,0.98,0.94):wl(sg.lam),
+      I:Math.min(1.9,0.55+sg.I*1.2)});                      // HDR 亮度，亮光束经 Bloom 发光
+  }
+  if(segs.length){
+    const R=0.024;                                          // 光束半径（格）
+    const tubeGeo=new THREE.CylinderGeometry(R,R,1,8,1,false);// 沿 Y 轴的实心圆柱
+    // 不透明彩色光柱（法向混合，不会像加性那样在亮底上糊成白色）；亮的经 Bloom 发光晕
+    const tubeMat=new THREE.MeshBasicMaterial();
+    const inst=new THREE.InstancedMesh(tubeGeo,tubeMat,segs.length);
+    const up=new THREE.Vector3(0,1,0),dir=new THREE.Vector3(),mid=new THREE.Vector3(),
+      q=new THREE.Quaternion(),sc=new THREE.Vector3(),mtx=new THREE.Matrix4(),col=new THREE.Color();
+    for(let i=0;i<segs.length;i++){
+      const s=segs[i];
+      dir.subVectors(s.B,s.A);
+      const L=dir.length()||1e-4; dir.divideScalar(L);
+      mid.addVectors(s.A,s.B).multiplyScalar(0.5);
+      q.setFromUnitVectors(up,dir);                          // Y 轴对齐光束方向
+      sc.set(1,L,1);                                         // 仅沿轴拉伸到光束长度
+      inst.setMatrixAt(i,mtx.compose(mid,q,sc));
+      inst.setColorAt(i,col.copy(s.c).multiplyScalar(s.I));
+    }
+    inst.instanceMatrix.needsUpdate=true;
+    if(inst.instanceColor)inst.instanceColor.needsUpdate=true;
+    sceneRoot.add(inst);
+  }
+  // 屏上光斑
+  for(const ht of HITS){
+    const c=ht.poly?new THREE.Color(1,0.98,0.94):wl(ht.lam);
+    const sp=new THREE.Mesh(new THREE.SphereGeometry(0.05,12,12),
+      new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:Math.min(1,0.4+ht.I),
+        blending:THREE.AdditiveBlending,depthWrite:false}));
+    sp.position.copy(P3(ht.p,BEAMY)); sceneRoot.add(sp);
+  }
+  fitRadius=Math.max(3,Math.hypot(padW,padD)/2);
+}
+
+/* ---------- 相机 / 视角 ---------- */
+function makeCamera(mode){
+  const w=three.clientWidth||1,h=three.clientHeight||1;
+  if(mode==='ortho'){
+    const f=fitRadius*1.25, a=w/h;
+    cam=new THREE.OrthographicCamera(-f*a,f*a,f,-f,0.1,400);
+  }else{
+    cam=new THREE.PerspectiveCamera(46,w/h,0.1,400);
+  }
+}
+function applyView(preset){
+  const r=fitRadius*2.2;
+  if(preset==='top')      cam.position.set(0.001,r*1.15,0.001);
+  else if(preset==='front')cam.position.set(0,fitRadius*0.55,r);
+  else                     cam.position.set(r*0.62,r*0.72,r*0.78); // iso
+  controls.target.set(0,0,0);
+  $('d3zoom').value=1; applyZoom(1);
+  controls.update();
+}
+function applyZoom(z){
+  if(!cam)return;
+  if(cam.isOrthographicCamera){cam.zoom=z;cam.updateProjectionMatrix();}
+  else{
+    const dir=new THREE.Vector3().subVectors(cam.position,controls.target).normalize();
+    const dist=(fitRadius*2.2)/z;
+    cam.position.copy(controls.target).addScaledVector(dir,dist);
+  }
+  controls.update();
+}
+function setProjection(mode){
+  projMode=mode;
+  const oldPos=cam?cam.position.clone():null, oldTgt=controls?controls.target.clone():new THREE.Vector3();
+  makeCamera(mode);
+  if(oldPos)cam.position.copy(oldPos);
+  if(controls){controls.object=cam;controls.target.copy(oldTgt);}
+  else{controls=new OrbitControls(cam,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=0.08;controls.maxPolarAngle=Math.PI*0.495;}
+  if(renderPass)renderPass.camera=cam;
+  controls.update();
+  document.querySelectorAll('#d3proj button').forEach(x=>x.classList.toggle('on',x.dataset.proj===mode));
+}
+
+/* ---------- 日/夜 ---------- */
+function applyDayNight(night){
+  isNight=night;
+  // 注意：光束是加性混合发光，背景过白会让光束“看不见”，故白天用中性石板灰而非纯白
+  const bg=night?0x070a10:0x8d99ab;
+  scene3.background=new THREE.Color(bg);
+  scene3.fog=new THREE.Fog(bg,fitRadius*3,fitRadius*9);
+  hemiLight.intensity=night?1.0:1.35;
+  hemiLight.groundColor.set(night?0x202830:0x6a7686);
+  if(boardMesh)boardMesh.material.color.set(night?0x3a4150:0x59636f);
+}
+
+/* ---------- 光源类型 / 渲染档位 ---------- */
+function setLightType(t){
+  lightType=t;
+  if(areaLight)areaLight.visible=(t==='area');
+  if(pointLight)pointLight.visible=(t==='point');
+  document.querySelectorAll('#d3light button').forEach(x=>x.classList.toggle('on',x.dataset.light===t));
+}
+function setQuality(level){
+  qLevel=level;
+  const pr=level==='low'?1:(level==='high'?Math.min(devicePixelRatio,2):Math.min(devicePixelRatio,1.5));
+  renderer.setPixelRatio(pr);
+  if(composer.setPixelRatio)composer.setPixelRatio(pr);
+  sizeThree();
+  document.querySelectorAll('#d3quality button').forEach(x=>x.classList.toggle('on',x.dataset.q===level));
+}
+
+/* ---------- 初始化 ---------- */
+function initThree(){
+  buildMaterials();
+  renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true,alpha:false});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure=1.25;
+  three.appendChild(renderer.domElement);
+  scene3=new THREE.Scene();
+  const pmrem=new THREE.PMREMGenerator(renderer);
+  envTex=pmrem.fromScene(new RoomEnvironment(),0.04).texture;
+  scene3.environment=envTex;
+  hemiLight=new THREE.HemisphereLight(0xbfd0ff,0x202830,1.0); scene3.add(hemiLight);
+  keyLight=new THREE.DirectionalLight(0xffffff,0.6); keyLight.position.set(6,12,8); scene3.add(keyLight);
+  fillLight=new THREE.DirectionalLight(0x88aaff,0.25); fillLight.position.set(-8,6,-6); scene3.add(fillLight);
+  uniformLight=new THREE.AmbientLight(0xffffff,parseFloat($('d3bri').value)); scene3.add(uniformLight);
+  // 可选主光：面光源（柔和均匀，默认）/ 点光源；让画面更亮更清晰且无刺眼热斑
+  RectAreaLightUniformsLib.init();
+  areaLight=new THREE.RectAreaLight(0xeef4ff,3.6,16,16); areaLight.position.set(0,10,2); areaLight.lookAt(0,0,0); scene3.add(areaLight);
+  pointLight=new THREE.PointLight(0xffffff,2.6,0,0); pointLight.position.set(4,9,5); pointLight.visible=false; scene3.add(pointLight);
+  makeCamera('persp');
+  controls=new OrbitControls(cam,renderer.domElement);
+  controls.enableDamping=true;controls.dampingFactor=0.08;controls.maxPolarAngle=Math.PI*0.495;
+  controls.autoRotateSpeed=1.1;
+  composer=new EffectComposer(renderer);
+  renderPass=new RenderPass(scene3,cam); composer.addPass(renderPass);
+  bloomPass=new UnrealBloomPass(new THREE.Vector2(1,1),parseFloat($('d3bloom').value),0.5,0.5);
+  composer.addPass(bloomPass);
+  composer.addPass(new OutputPass());
+  new ResizeObserver(()=>{ if(d3on)sizeThree(); }).observe(three);
+}
+function sizeThree(){
+  if(!renderer)return;
+  const w=three.clientWidth,h=three.clientHeight; if(!w||!h)return;
+  renderer.setSize(w,h); composer.setSize(w,h);
+  if(cam.isOrthographicCamera){const f=fitRadius*1.25,a=w/h;cam.left=-f*a;cam.right=f*a;cam.top=f;cam.bottom=-f;}
+  else cam.aspect=w/h;
+  cam.updateProjectionMatrix();
+}
+function loop(){
+  if(!d3on)return;
+  controls.update(); composer.render();
+  rafId=requestAnimationFrame(loop);
+}
+
+/* ---------- 进入 / 退出 ---------- */
+async function enter3D(){
+  $('d3loading').classList.add('on');
+  $('three').style.display='block';
+  const ok=await loadThree().catch(()=>false);
+  if(!ok){$('d3loading').innerHTML='<span>'+OB.tr('d3Fail')+'</span>';
+    setTimeout(()=>{exit3D();},1800); return;}
+  if(!renderer)initThree();
+  d3on=true;
+  isNight=!OB.getLight(); $('d3night').checked=isNight;
+  $('three').style.display='block';
+  $('d3panel').classList.add('on');
+  $('zoomctl').style.display='none';
+  const aside=document.querySelector('aside');
+  if(aside){aside.style.pointerEvents='none';aside.style.opacity='0.4';}
+  $('d3btn').classList.add('on'); $('d3btn').textContent=OB.tr('d3Back'); $('d3btn').title=OB.tr('d3BackTitle');
+  sizeThree();
+  build3D();
+  setProjection('persp');
+  applyDayNight(isNight);
+  setLightType(lightType);
+  setQuality(qLevel);
+  applyView('iso');
+  $('d3loading').classList.remove('on');
+  cancelAnimationFrame(rafId); loop();
+}
+function exit3D(){
+  d3on=false; cancelAnimationFrame(rafId);
+  $('three').style.display='none';
+  $('d3panel').classList.remove('on');
+  $('d3loading').classList.remove('on');
+  $('zoomctl').style.display='';
+  const aside=document.querySelector('aside');
+  if(aside){aside.style.pointerEvents='';aside.style.opacity='';}
+  $('d3btn').classList.remove('on'); $('d3btn').textContent=OB.tr('d3Btn'); $('d3btn').title=OB.tr('d3Title');
+}
+function toggle3D(){ d3on?exit3D():enter3D(); }
+
+/* ---------- 导出 PNG ---------- */
+function exportPNG(){
+  if(!renderer)return;
+  const scale=parseInt($('d3expscale').value)||2;
+  const w=three.clientWidth, h=three.clientHeight;
+  const prevPR=renderer.getPixelRatio();
+  // 固定 pixelRatio=1 再放大尺寸 → 输出精确为 (w*scale)×(h*scale)，与渲染档位无关
+  renderer.setPixelRatio(1); if(composer.setPixelRatio)composer.setPixelRatio(1);
+  renderer.setSize(w*scale,h*scale,false); composer.setSize(w*scale,h*scale);
+  composer.render();
+  renderer.domElement.toBlob(bl=>{
+    renderer.setPixelRatio(prevPR); if(composer.setPixelRatio)composer.setPixelRatio(prevPR);
+    renderer.setSize(w,h,false); composer.setSize(w,h);
+    if(!bl)return;
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(bl); a.download='opticalboard-3d.png';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+  },'image/png');
+}
+
+/* ---------- 控件绑定 ---------- */
+$('d3btn').addEventListener('click',toggle3D);
+document.querySelectorAll('#d3proj button').forEach(btn=>btn.addEventListener('click',()=>{
+  setProjection(btn.dataset.proj); applyZoom(parseFloat($('d3zoom').value));
+}));
+document.querySelectorAll('#d3presets button').forEach(btn=>btn.addEventListener('click',()=>applyView(btn.dataset.view)));
+$('d3reset').addEventListener('click',()=>applyView('iso'));
+$('d3zoom').addEventListener('input',e=>applyZoom(parseFloat(e.target.value)));
+$('d3spin').addEventListener('change',e=>{controls.autoRotate=e.target.checked;});
+$('d3night').addEventListener('change',e=>applyDayNight(e.target.checked));
+$('d3board').addEventListener('change',e=>{if(boardMesh)boardMesh.visible=e.target.checked;});
+$('d3bri').addEventListener('input',e=>{if(uniformLight)uniformLight.intensity=parseFloat(e.target.value);});
+$('d3bloom').addEventListener('input',e=>{if(bloomPass)bloomPass.strength=parseFloat(e.target.value);});
+document.querySelectorAll('#d3light button').forEach(btn=>btn.addEventListener('click',()=>setLightType(btn.dataset.light)));
+document.querySelectorAll('#d3quality button').forEach(btn=>btn.addEventListener('click',()=>setQuality(btn.dataset.q)));
+$('d3export').addEventListener('click',exportPNG);
+// 退出 3D 的快捷键
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&d3on)exit3D();});
 </script>
 </body>
 </html>
