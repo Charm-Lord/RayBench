@@ -2159,6 +2159,11 @@ const three=$('three');
 /* ---------- 颜色/几何工具 ---------- */
 const wl=lam=>{const c=OB.wlRGB(lam);return new THREE.Color(c.r/255,c.g/255,c.b/255);};
 const P3=(p,y)=>new THREE.Vector3(p.x/CELL-centerCi,y,p.y/CELL-centerCj);
+// 按亮度把颜色归一到目标值：让蓝/红等低亮度波长也能触发 Bloom，且辉光保持本色
+function glowColor(c,tl){
+  const lum=Math.max(0.0015,0.2126*c.r+0.7152*c.g+0.0722*c.b);
+  return c.clone().multiplyScalar(Math.min(18,tl/lum));
+}
 
 /* ---------- 材质（懒建，依赖 THREE） ---------- */
 let MAT=null;
@@ -2305,7 +2310,7 @@ function makeOptic(k,e){
     }
     const col=e.props.poly?new THREE.Color(1,0.98,0.94):wl(e.props.lam);
     const ap=new THREE.Mesh(new THREE.CylinderGeometry(apR*0.92,apR*0.92,0.012,24),
-      new THREE.MeshBasicMaterial({color:col}));
+      new THREE.MeshBasicMaterial({color:glowColor(col,1.3)}));
     ap.rotation.x=Math.PI/2; ap.position.z=-0.355; g.add(ap);
     return placeByBasis(g,c,t,nrm,BEAMY);
   }
@@ -2388,7 +2393,7 @@ function build3D(){
     if(len>maxLen){const s=maxLen/len;bb={x:a.x+dx*s,y:a.y+dy*s};}
     segs.push({A:P3(a,BEAMY),B:P3(bb,BEAMY),
       c:sg.poly?new THREE.Color(1,0.98,0.94):wl(sg.lam),
-      I:Math.min(1.9,0.55+sg.I*1.2)});                      // HDR 亮度，亮光束经 Bloom 发光
+      tl:0.7+Math.min(1,sg.I)*0.9});                        // 目标亮度（随强度），各色统一触发辉光
   }
   if(segs.length){
     const R=0.05;                                           // 光束半径（格）——更粗的圆柱光柱
@@ -2406,7 +2411,8 @@ function build3D(){
       q.setFromUnitVectors(up,dir);                          // Y 轴对齐光束方向
       sc.set(1,L,1);                                         // 仅沿轴拉伸到光束长度
       inst.setMatrixAt(i,mtx.compose(mid,q,sc));
-      inst.setColorAt(i,col.copy(s.c).multiplyScalar(s.I));
+      const cc=s.c, lum=Math.max(0.0015,0.2126*cc.r+0.7152*cc.g+0.0722*cc.b);
+      inst.setColorAt(i,col.copy(cc).multiplyScalar(Math.min(18,s.tl/lum))); // 归一到目标亮度→各色等效发光
     }
     inst.instanceMatrix.needsUpdate=true;
     if(inst.instanceColor)inst.instanceColor.needsUpdate=true;
@@ -2416,7 +2422,7 @@ function build3D(){
   for(const ht of HITS){
     const c=ht.poly?new THREE.Color(1,0.98,0.94):wl(ht.lam);
     const sp=new THREE.Mesh(new THREE.SphereGeometry(0.05,12,12),
-      new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:Math.min(1,0.4+ht.I),
+      new THREE.MeshBasicMaterial({color:glowColor(c,1.2),transparent:true,opacity:Math.min(1,0.5+ht.I),
         blending:THREE.AdditiveBlending,depthWrite:false}));
     sp.position.copy(P3(ht.p,BEAMY)); sceneRoot.add(sp);
   }
