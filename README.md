@@ -3,8 +3,8 @@
 一款直接在浏览器里运行的几何光学追迹模拟器。
 十几种光学元件等你使用，实时追迹光线，一键转3D模型，搭建属于你的光学系统。
 
-A single-file 2D geometric-optics ray-tracing playground that runs entirely in the browser. Drag in optical elements, watch the rays trace in real time, and build your own optical setup.
-
+A geometric optics tracing simulator that runs directly in your browser.
+A dozen or so optical components are available for you to use, allowing you to trace rays in real time, convert them to 3D models with a single click, and build your own optical system.
 ---
 ## 亮点
 
