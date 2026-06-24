@@ -133,11 +133,26 @@ aside h3:not(:first-of-type){border-top:1px solid var(--line);margin-top:6px;pad
 .pbtns button.danger:hover{border-color:#e3635f;color:#e3635f}
 .empty{font-size:12px;color:var(--dim);line-height:1.8;padding:2px 0 4px;font-family:var(--hei)}
 #scenebox{padding:0 16px 6px}
-#scenebox summary{font-size:11px;color:var(--dim);letter-spacing:2px;font-weight:600;cursor:pointer;padding:9px 0;list-style:none;user-select:none;font-family:var(--hei)}
-#scenebox summary::-webkit-details-marker{display:none}
-#scenebox summary::before{content:'▸';display:inline-block;margin-right:7px;transition:transform .18s;color:var(--acc)}
-#scenebox[open] summary::before{transform:rotate(90deg)}
-#scenes{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px 0 6px}
+/* 抽屉式板块 */
+.dw{border-top:1px solid var(--line)}
+.dw:first-of-type{border-top:none}
+.dw>summary{font-size:11px;color:var(--dim);letter-spacing:1.4px;font-weight:600;cursor:pointer;
+  padding:13px 16px;list-style:none;user-select:none;font-family:var(--hei);display:flex;align-items:center}
+.dw>summary::-webkit-details-marker{display:none}
+.dw>summary::before{content:'▸';display:inline-block;margin-right:8px;transition:transform .18s;color:var(--acc)}
+.dw[open]>summary::before{transform:rotate(90deg)}
+.measwrap{padding:0 16px 12px;display:flex;flex-direction:column;gap:9px}
+.msub{font-size:11px;color:var(--dim);font-weight:600;margin-top:5px;letter-spacing:.5px;font-family:var(--hei)}
+.measbtn{padding:9px 0;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-size:12.5px;cursor:pointer;font-family:var(--hei);transition:.15s}
+.measbtn:hover{border-color:var(--acc);color:var(--acc)}
+.measbtn.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 16%,var(--panel2));color:var(--acc)}
+.mrow{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--dim);font-family:var(--hei)}
+.mrow input{width:60px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:7px;padding:4px 6px;font-family:var(--mono);font-size:12px;text-align:right;-moz-appearance:textfield}
+.mread{font-size:12px;color:var(--ink);font-family:var(--hei);line-height:1.75;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 9px}
+.mclear{padding:6px 0;border-radius:9px;border:1px solid var(--line);background:none;color:var(--dim);font-size:11.5px;cursor:pointer;font-family:var(--hei)}
+.mclear:hover{color:var(--acc);border-color:var(--acc)}
+#props{padding:0 16px 6px}
+#scenes{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px 16px 10px}
 #config{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px 10px}
 #clearbtn{margin:6px 16px 4px;padding:10px 0;border-radius:11px;border:1px solid color-mix(in srgb,#e3635f 45%,var(--line));background:color-mix(in srgb,#e3635f 10%,var(--panel2));color:#e3635f;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--hei);transition:background .15s,transform .1s,box-shadow .15s}
 #clearbtn:hover{background:color-mix(in srgb,#e3635f 18%,var(--panel2));box-shadow:0 0 0 1px #e3635f inset}
@@ -393,13 +408,26 @@ body.light #rqseg button.on{color:#fff}
     </div>
     <aside>
       <div class="drawer-handle" id="drawerHandle" aria-label="展开或收起面板"></div>
-      <h3 data-i18n="hLib">元件库</h3>
-      <div id="palette"></div>
-      <h3 data-i18n="hProp">属性</h3>
-      <div id="props"></div>
-      <button id="clearbtn" data-i18n="sc_clear">清空画布</button>
-      <details id="scenebox">
-        <summary data-i18n="hScenes">示例场景</summary>
+      <details class="dw" open><summary data-i18n="hLib">元件库</summary>
+        <div id="palette"></div>
+        <button id="clearbtn" data-i18n="sc_clear">清空画布</button>
+      </details>
+      <details class="dw" open><summary data-i18n="hProp">属性</summary>
+        <div id="props"></div>
+      </details>
+      <details class="dw" open id="measDrawer"><summary data-i18n="hMeasure">测量</summary>
+        <div class="measwrap">
+          <div class="msub" data-i18n="mLen">长度测量</div>
+          <button id="measBtn" class="measbtn" data-i18n="mRuler">测量长度</button>
+          <label class="mrow"><span data-i18n="mScale">比例尺 1格 =</span><input id="measScale" type="number" min="0.001" step="0.5" value="10"><span>mm</span></label>
+          <div class="mread" id="measLenRead" data-i18n="mLenNo">未测量</div>
+          <button id="measClear" class="mclear" data-i18n="mClear">清除标尺</button>
+          <div class="msub" data-i18n="mInt">光强 / 功率测量</div>
+          <button id="measAddDet" class="measbtn" data-i18n="mAddDet">＋ 放置探测器</button>
+          <div class="mread" id="measDetList"></div>
+        </div>
+      </details>
+      <details class="dw"><summary data-i18n="hScenes">示例场景</summary>
         <div id="scenes">
           <button data-scene="lens" data-i18n="sc_lens">透镜聚焦</button>
           <button data-scene="michelson" data-i18n="sc_michelson">迈克尔逊干涉</button>
@@ -412,12 +440,13 @@ body.light #rqseg button.on{color:#fff}
           <button data-scene="glass" data-i18n="sc_glass">棱镜与玻璃</button>
         </div>
       </details>
-      <h3 data-i18n="hConfig">配置存档</h3>
-      <div id="config">
-        <button id="cfgexport" data-i18n="cfgExport">导出配置</button>
-        <button id="cfgload" data-i18n="cfgLoad">加载配置</button>
-        <input id="cfgfile" type="file" accept="application/json,.json" hidden>
-      </div>
+      <details class="dw"><summary data-i18n="hConfig">配置存档</summary>
+        <div id="config">
+          <button id="cfgexport" data-i18n="cfgExport">导出配置</button>
+          <button id="cfgload" data-i18n="cfgLoad">加载配置</button>
+          <input id="cfgfile" type="file" accept="application/json,.json" hidden>
+        </div>
+      </details>
     </aside>
   </main>
   <div id="tour" hidden>
@@ -577,6 +606,18 @@ const I18N={
   pRot1T:{zh:'精调旋转，每次 1 度',en:'Fine rotate, 1° per click'}, pRot90T:{zh:'旋转 90 度',en:'Rotate 90°'},
   // 属性标签
   l_rotOut:{zh:'出射方向 °',en:'Beam dir °'}, l_rot:{zh:'旋转角 °',en:'Rotation °'},
+  l_polMode:{zh:'偏振',en:'Polarization'}, l_polAng:{zh:'偏振角 °',en:'Pol angle °'},
+  o_unpol:{zh:'自然光(非偏振)',en:'Unpolarized'}, o_linear:{zh:'线偏振',en:'Linear'},
+  l_axis:{zh:'透光轴 °',en:'Axis °'}, l_fast:{zh:'快轴 °',en:'Fast axis °'},
+  mtP:{zh:'功率',en:'Power'}, mtI:{zh:'光强',en:'Intensity'}, mtRays:{zh:'光线',en:'Rays'},
+  mtPol:{zh:'偏振',en:'Pol'}, mtUnpol:{zh:'自然光',en:'unpol'}, mtMixed:{zh:'混合',en:'mixed'},
+  mtNo:{zh:'无光入射',en:'No light'},
+  hMeasure:{zh:'测量',en:'MEASURE'},
+  mLen:{zh:'长度测量',en:'Length'}, mRuler:{zh:'测量长度',en:'Measure length'},
+  mScale:{zh:'比例尺 1格 =',en:'Scale 1 cell ='}, mLenNo:{zh:'未测量（点工具后在画布点两点）',en:'Not measured (click two points)'},
+  mClear:{zh:'清除标尺',en:'Clear'}, mCells:{zh:'格',en:'cells'},
+  mInt:{zh:'光强 / 功率测量',en:'Intensity / Power'}, mAddDet:{zh:'＋ 放置探测器',en:'+ Place detector'},
+  mDetNo:{zh:'尚无探测器，点上方按钮放置',en:'No detector yet'},
   l_ox:{zh:'水平微调 格',en:'Shift X cell'}, l_oy:{zh:'垂直微调 格',en:'Shift Y cell'},
   l_poly:{zh:'复色光（白光）',en:'White light'}, l_lam:{zh:'波长 nm',en:'Wavelength nm'},
   l_width:{zh:'光束宽度 px',en:'Beam width px'}, l_bri:{zh:'亮度',en:'Brightness'},
@@ -658,7 +699,7 @@ let RQ='med';
 /* ---------- 元件定义 ---------- */
 const ELEMS={
   source:{name:'激光源',en:'Laser',half:.3,
-    defaults:()=>({rot:0,lam:632,width:6,bri:1,poly:false}),
+    defaults:()=>({rot:0,lam:632,width:6,bri:1,poly:false,polMode:'unpol',polAng:0}),
     icon:'<svg viewBox="0 0 36 36"><rect x="3" y="11" width="19" height="14" rx="4" fill="#141b26" stroke="#cfd8e3" stroke-width="2"/><circle cx="24.5" cy="18" r="2.6" fill="#ffb454"/><path d="M28 18h5.5m-3-3l3 3-3 3" stroke="#ffb454" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'},
   mirror:{name:'反射镜',en:'Mirror',half:.46,
     defaults:()=>({rot:45}),
@@ -700,6 +741,18 @@ const ELEMS={
   bbo:{name:'倍频晶体',en:'SHG · BBO',half:.4,
     defaults:()=>({rot:90,effMax:80,pmAngle:0,accept:25}),
     icon:'<svg viewBox="0 0 36 36"><rect x="12.5" y="5" width="11" height="26" rx="1.5" fill="rgba(150,120,235,.22)" stroke="#b69cff" stroke-width="2"/><path d="M5 12h7m-7 0l2.6-2.1m-2.6 2.1l2.6 2.1" stroke="#ff5a5a" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 24h7m0 0l-2.6-2.1m2.6 2.1l-2.6 2.1" stroke="#39d98a" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'},
+  meter:{name:'探测器',en:'Power meter',half:.5,
+    defaults:()=>({rot:0}),
+    icon:'<svg viewBox="0 0 36 36"><rect x="5" y="9" width="26" height="18" rx="3" fill="#161d29" stroke="#46546b" stroke-width="2"/><path d="M11 23a7 7 0 0 1 14 0" fill="none" stroke="#39d98a" stroke-width="2"/><path d="M18 23l5-5" stroke="#ffb454" stroke-width="2" stroke-linecap="round"/><circle cx="18" cy="23" r="1.6" fill="#ffb454"/></svg>'},
+  polarizer:{name:'偏振片',en:'Polarizer',half:.42,
+    defaults:()=>({rot:90,axis:0}),
+    icon:'<svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="12.5" fill="rgba(120,150,200,.12)" stroke="#9fb6d6" stroke-width="2"/><path d="M11 8.5v19M18 6.5v23M25 8.5v19" stroke="#9fb6d6" stroke-width="1.5"/><path d="M7.5 18h21" stroke="#ffb454" stroke-width="1.8" stroke-dasharray="3 2"/></svg>'},
+  halfwave:{name:'半波片',en:'Half-wave',half:.42,
+    defaults:()=>({rot:90,fast:0}),
+    icon:'<svg viewBox="0 0 36 36"><rect x="9" y="5" width="18" height="26" rx="3" fill="rgba(110,205,160,.16)" stroke="#7fd0a8" stroke-width="2"/><text x="18" y="21" font-size="9" fill="#bfeed6" text-anchor="middle" font-family="monospace">&#955;/2</text></svg>'},
+  pbs:{name:'偏振分束器',en:'Polar. BS',half:.46,
+    defaults:()=>({rot:135,axis:0}),
+    icon:'<svg viewBox="0 0 36 36"><rect x="8.5" y="8.5" width="19" height="19" rx="2.5" stroke="#bcd0e8" fill="rgba(130,150,180,.12)" stroke-width="2"/><path d="M8.5 27.5L27.5 8.5" stroke="#ffb454" stroke-width="2"/><circle cx="13.5" cy="22.5" r="1.5" fill="#9fd0ff"/><path d="M23 8.5v6.5" stroke="#ff8aa0" stroke-width="1.8"/></svg>'},
   custom:{name:'自定义',en:'Custom',half:.46,
     defaults:()=>({rot:90,outMode:'rel',dTheta:30,absTheta:0,lamMode:'keep',lamSet:550,lamShift:0,trans:100,splitOn:false,splitRatio:30}),
     icon:'<svg viewBox="0 0 36 36"><rect x="6" y="6" width="24" height="24" rx="7" fill="none" stroke="#8b97ab" stroke-width="2" stroke-dasharray="4 3"/><text x="18" y="24.5" font-size="17" font-style="italic" font-family="Georgia,serif" fill="#dde6f2" text-anchor="middle">&#402;</text></svg>'}
@@ -713,9 +766,11 @@ const view={x:0,y:0,s:1};
 let selSet=new Set();
 let GID=1;
 let placing=null;
+let measuring=false, measures=[], measureLive=null, mmPerCell=10;   // 标尺：模式 / 已完成多条 / 进行中 / 比例尺(mm每格)
 let hoverCell=null;
 let needTrace=true, needDraw=true;
 let SEGS=[], HITS=[];
+const METER=new Map();   // 探测器累计：元件对象 → {pw,n,lamSum,polSet}
 
 function groupKeys(g){
   const a=[];
@@ -807,6 +862,7 @@ function emit(k,e,Q){
   const c=v((+p[0]+.5+(P.ox||0))*CELL,(+p[1]+.5-(P.oy||0))*CELL);
   const wid=P.width;
   const bri=P.bri===undefined?1:P.bri;
+  const pol=(P.polMode==='linear')?(P.polAng||0):null;   // 线偏振角(度) 或 null(自然光)
   const apX=8;                         // 出光口在元件本地坐标的位置
   // 渲染精细度联动光线密度：流畅档稀疏省负荷，精细档加密最好看
   const polyStep=(RQ==='low'?20:(RQ==='high'?7:12));   // 复色光采样波长间隔 nm
@@ -815,7 +871,7 @@ function emit(k,e,Q){
     const start=add(c,mul(d,apX));
     const drawW=Math.max(2.5,wid*0.45);
     for(let w=395;w<=745;w+=polyStep){
-      Q.push({p:start,d,lam:w,w:drawW,I:0.3*bri,gen:0,poly:true});
+      Q.push({p:start,d,lam:w,w:drawW,I:0.3*bri,gen:0,poly:true,pol});
     }
     return;
   }
@@ -827,18 +883,18 @@ function emit(k,e,Q){
   for(let b=0;b<K;b++){
     const off=K>1?(-wid/2+dw*(b+0.5)):0;
     const start=add(add(c,mul(n,off)),mul(d,apX));
-    Q.push({p:start,d,lam:P.lam,w:drawW,I:(K>1?0.85:1)*bri,gen:0});
+    Q.push({p:start,d,lam:P.lam,w:drawW,I:(K>1?0.85:1)*bri,gen:0,pol});
   }
 }
 
 /* ---------- 光线追迹 ---------- */
 function interact(r,S,pt,Q){
   const e=S.e, type=e.type, P=e.props;
-  const go=(d,I,lam,dropPoly)=>{
+  const go=(d,I,lam,dropPoly,pol)=>{
     d=norm(d);
-    Q.push({p:add(pt,mul(d,0.05)),d,lam:(lam===undefined?r.lam:lam),w:r.w,I,gen:r.gen+1,poly:(dropPoly?false:r.poly)});
+    Q.push({p:add(pt,mul(d,0.05)),d,lam:(lam===undefined?r.lam:lam),w:r.w,I,gen:r.gen+1,poly:(dropPoly?false:r.poly),pol:(pol===undefined?r.pol:pol)});
   };
-  const absorb=()=>{HITS.push({p:pt,lam:r.lam,I:r.I,poly:r.poly})};
+  const absorb=()=>{HITS.push({p:pt,lam:r.lam,I:r.I,poly:r.poly,pol:r.pol})};
   if(type==='screen'){absorb();return}
   if(type==='source')return;
   if(type==='mirror'){
@@ -946,6 +1002,39 @@ function interact(r,S,pt,Q){
     if(R<0.99)go(r.d,r.I*(1-R),undefined,true);              // 透射分量
     return;
   }
+  if(type==='polarizer'){
+    // 偏振片：透光轴 axis(实验室系,度)。自然光透一半;线偏振按 Malus 定律 cos²
+    const ax=P.axis||0;
+    let Iout;
+    if(r.pol==null)Iout=r.I*0.5;
+    else{const d2=(r.pol-ax)*D2R;Iout=r.I*Math.cos(d2)*Math.cos(d2);}
+    if(Iout>0.004)go(r.d,Iout,undefined,false,ax);   // 出射沿透光轴线偏振
+    else absorb();
+    return;
+  }
+  if(type==='halfwave'){
+    // 半波片:线偏振关于快轴镜像 θ'=2·fast−θ;自然光不变
+    if(r.pol==null){go(r.d,r.I);return;}
+    go(r.d,r.I,undefined,false,2*(P.fast||0)-r.pol);
+    return;
+  }
+  if(type==='pbs'){
+    // 偏振分束器:透射沿 axis 分量(P),反射沿 axis+90 分量(S),按 45° 面反射
+    const ax=P.axis||0;
+    let It,Ir;
+    if(r.pol==null){It=r.I*0.5;Ir=r.I*0.5;}
+    else{const d2=(r.pol-ax)*D2R;It=r.I*Math.cos(d2)*Math.cos(d2);Ir=r.I-It;}
+    if(It>0.004)go(r.d,It,undefined,false,ax);
+    if(Ir>0.004)go(sub(r.d,mul(S.n,2*dot(r.d,S.n))),Ir,undefined,false,ax+90);
+    return;
+  }
+  if(type==='meter'){
+    // 探测器/功率计:吸收并累计入射功率(相对单位)
+    let m=METER.get(e); if(!m){m={pw:0,n:0,lamSum:0,polSet:new Set()};METER.set(e,m);}
+    m.pw+=r.I; m.n++; m.lamSum+=r.lam*r.I; if(r.pol!=null)m.polSet.add(Math.round(r.pol));
+    absorb();
+    return;
+  }
   if(type==='custom'){
     let lam=r.lam;
     const recolor=(P.lamMode==='set'||P.lamMode==='shift');
@@ -974,7 +1063,7 @@ function interact(r,S,pt,Q){
 }
 
 function trace(){
-  SEGS=[];HITS=[];
+  SEGS=[];HITS=[];METER.clear();
   const Q=[], elems=[];
   for(const [k,e] of grid){
     if(e.type==='source')emit(k,e,Q);
@@ -1019,6 +1108,18 @@ function rr(c,x,y,w,h,r){
   c.closePath();
 }
 
+function meterText(e){
+  const m=METER.get(e);
+  if(!m||!m.n)return tr('mtNo');
+  const meanLam=m.lamSum/(m.pw||1);
+  const inten=m.pw/(ELEMS.meter.half*2);
+  let polTxt;
+  if(m.polSet.size===0)polTxt=tr('mtUnpol');
+  else if(m.polSet.size===1)polTxt=[...m.polSet][0]+'°';
+  else polTxt=tr('mtMixed');
+  return tr('mtP')+' <b>'+m.pw.toFixed(2)+'</b> · '+tr('mtI')+' '+inten.toFixed(2)+'<br>'+
+    tr('mtRays')+' '+m.n+' · λ̄ '+meanLam.toFixed(0)+'nm<br>'+tr('mtPol')+' '+polTxt;
+}
 function drawElem(k,e){
   const p=k.split(',');
   const cx=(+p[0]+.5+(e.props.ox||0))*CELL, cy=(+p[1]+.5-(e.props.oy||0))*CELL;
@@ -1215,10 +1316,87 @@ function drawElem(k,e){
     ctx.textAlign='center';
     ctx.textBaseline='middle';
     ctx.fillText('\u0192',0,1);
+  }else if(e.type==='meter'){
+    // \u63a2\u6d4b\u5668\u9762\u677f\uff08\u6a2a\u8de8\u5149\u8def\uff09+ \u5b9e\u65f6\u8bfb\u6570
+    ctx.fillStyle='#161d29'; ctx.strokeStyle='#46546b'; ctx.lineWidth=2;
+    rr(ctx,-h,-7,2*h,14,3); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle='#39d98a'; ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(-h,-7);ctx.lineTo(h,-7);ctx.stroke();
+    const m=METER.get(e);
+    ctx.rotate(-((e.props.rot||0)*D2R));
+    ctx.fillStyle=T.light?'#2b3442':'#dfe7f2';
+    ctx.font='11px ui-monospace,monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('P '+(m?m.pw.toFixed(2):'0'),0,-22);
+    if(selSet.has(k)){const rd=document.getElementById('meterVal'); if(rd)rd.innerHTML=meterText(e);}
+  }else if(e.type==='polarizer'){
+    ctx.fillStyle=css({r:140,g:165,b:205},T.light?.12:.16);
+    ctx.strokeStyle='#9fb6d6'; ctx.lineWidth=2.5;
+    rr(ctx,-h,-5,2*h,10,3); ctx.fill(); ctx.stroke();
+    const a=((e.props.axis||0)-(e.props.rot||0))*D2R, L=h*0.92;   // \u900f\u5149\u8f74\u6307\u793a(\u5b9e\u9a8c\u5ba4\u89d2)
+    ctx.strokeStyle='#ffb454'; ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(-Math.cos(a)*L,-Math.sin(a)*L);ctx.lineTo(Math.cos(a)*L,Math.sin(a)*L);ctx.stroke();
+  }else if(e.type==='halfwave'){
+    ctx.fillStyle=css({r:110,g:205,b:160},T.light?.14:.18);
+    ctx.strokeStyle='#7fd0a8'; ctx.lineWidth=2.5;
+    rr(ctx,-h,-7,2*h,14,3); ctx.fill(); ctx.stroke();
+    const a=((e.props.fast||0)-(e.props.rot||0))*D2R, L=h*0.88;   // \u5feb\u8f74\u6307\u793a
+    ctx.strokeStyle='#39d98a'; ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(-Math.cos(a)*L,-Math.sin(a)*L);ctx.lineTo(Math.cos(a)*L,Math.sin(a)*L);ctx.stroke();
+    ctx.rotate(-((e.props.rot||0)*D2R));
+    ctx.fillStyle=T.light?'#2b6f55':'#bfeed6'; ctx.font='10px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('\u03bb/2',0,0);
+  }else if(e.type==='pbs'){
+    ctx.fillStyle=css({r:130,g:150,b:180},T.light?.10:.14);
+    ctx.strokeStyle='#bcd0e8'; ctx.lineWidth=2;
+    const s=h*0.78; rr(ctx,-s,-s,2*s,2*s,3); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle='#ffb454'; ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.moveTo(-h,0);ctx.lineTo(h,0);ctx.stroke();
   }
   ctx.restore();
 }
 
+function fmtLen(px){
+  const mm=px/CELL*mmPerCell;
+  if(mm>=1000)return (mm/1000).toFixed(3)+' m';
+  if(mm>=10)return mm.toFixed(2)+' mm';
+  return mm.toFixed(3)+' mm';
+}
+function drawOneMeasure(a,b){       // 字号按 1/s 抵消缩放，保持恒定
+  const s=view.s;
+  ctx.setLineDash([6/s,4/s]);
+  ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  ctx.setLineDash([]);
+  const r=4/s;
+  ctx.beginPath();ctx.arc(a.x,a.y,r,0,TAU);ctx.stroke();
+  ctx.beginPath();ctx.arc(b.x,b.y,r,0,TAU);ctx.stroke();
+  ctx.font=(13/s)+'px ui-monospace,monospace';
+  ctx.textAlign='center';ctx.textBaseline='bottom';
+  ctx.fillText(fmtLen(Math.hypot(b.x-a.x,b.y-a.y)),(a.x+b.x)/2,(a.y+b.y)/2-7/s);
+}
+function drawMeasure(){
+  if(!measures.length&&!measureLive)return;
+  ctx.save();
+  ctx.strokeStyle=T.acc;ctx.fillStyle=T.acc;ctx.lineWidth=1.6/view.s;
+  for(const m of measures)drawOneMeasure(m.a,m.b);
+  if(measureLive)drawOneMeasure(measureLive.a,measureLive.b);
+  ctx.restore();
+}
+function updateMeasPanel(){
+  const lr=document.getElementById('measLenRead');
+  if(lr){
+    const all=measures.concat(measureLive?[measureLive]:[]);
+    if(all.length)lr.innerHTML=all.map((m,i)=>{const d=Math.hypot(m.b.x-m.a.x,m.b.y-m.a.y);
+      return '#'+(i+1)+'  '+fmtLen(d)+'  ('+(d/CELL).toFixed(2)+' '+tr('mCells')+')';}).join('<br>');
+    else lr.textContent=tr('mLenNo');
+  }
+  const dl=document.getElementById('measDetList');
+  if(dl){
+    const rows=[];let i=0;
+    for(const [k,e] of grid){if(e.type==='meter'){i++;const m=METER.get(e);
+      rows.push('#'+i+'  '+(m&&m.n?(tr('mtP')+' '+m.pw.toFixed(2)+' · '+tr('mtI')+' '+(m.pw/(ELEMS.meter.half*2)).toFixed(2)):tr('mtNo')));}}
+    dl.innerHTML=rows.length?rows.join('<br>'):'<span style="color:var(--dim)">'+tr('mDetNo')+'</span>';
+  }
+}
 function draw(){
   let dpr,W,H;
   if(RENDER_DPR!=null){                 // 离屏导出：位图不上屏，沿用指定倍率
@@ -1328,6 +1506,7 @@ function draw(){
     ctx.beginPath();ctx.arc(ht.p.x,ht.p.y,7,0,TAU);ctx.fill();
   }
   ctx.restore();
+  drawMeasure();
   if(selSet.size&&!hideElems){
     ctx.save();
     ctx.strokeStyle=T.sel;
@@ -1370,6 +1549,7 @@ function draw(){
     }
     ctx.restore();
   }
+  updateMeasPanel();
   statEl.textContent=tr('statEl')+' '+grid.size+' · '+tr('statRay')+' '+SEGS.length;
 }
 
@@ -1408,6 +1588,24 @@ document.getElementById('zin').addEventListener('click',()=>zoomBy(1.25));
 document.getElementById('zout').addEventListener('click',()=>zoomBy(0.8));
 document.getElementById('zfit').addEventListener('click',fitView);
 
+/* ---------- 测量板块 ---------- */
+const measBtn=document.getElementById('measBtn');
+function setMeasuring(on){
+  measuring=on;
+  if(on){placing=null;hoverCell=null;renderProps();}
+  if(measBtn)measBtn.classList.toggle('on',on);
+  setCursor(on?'c-place':null);
+  needDraw=true;
+}
+if(measBtn)measBtn.addEventListener('click',()=>setMeasuring(!measuring));
+const measScaleI=document.getElementById('measScale');
+if(measScaleI)measScaleI.addEventListener('input',e=>{const v2=parseFloat(e.target.value);if(v2>0){mmPerCell=v2;needDraw=true;}});
+const measClearB=document.getElementById('measClear');
+if(measClearB)measClearB.addEventListener('click',()=>{measures=[];measureLive=null;needDraw=true;});
+const measAddB=document.getElementById('measAddDet');
+if(measAddB)measAddB.addEventListener('click',()=>{setMeasuring(false);placing='meter';hoverCell=null;renderProps();needDraw=true;});
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&measuring)setMeasuring(false);});
+
 cv.addEventListener('wheel',ev=>{
   ev.preventDefault();
   const p=evtPos(ev);
@@ -1433,6 +1631,12 @@ function setCursor(state){
   if(state)cv.classList.add(state);
 }
 cv.addEventListener('pointerdown',ev=>{
+  if(measuring){                       // 标尺：第一次点击定起点，第二次定终点
+    const q=evtPos(ev),w=s2w(q.x,q.y);
+    if(!measureLive)measureLive={a:w,b:w};
+    else{measureLive.b=w;measures.push(measureLive);measureLive=null;}
+    needDraw=true; return;
+  }
   cv.setPointerCapture(ev.pointerId);
   ptrs.set(ev.pointerId,evtPos(ev));
   if(ptrs.size===2){
@@ -1453,6 +1657,10 @@ cv.addEventListener('pointerdown',ev=>{
 
 cv.addEventListener('pointermove',ev=>{
   const p=evtPos(ev);
+  if(measuring){
+    if(measureLive){measureLive.b=s2w(p.x,p.y);needDraw=true;}
+    setCursor('c-place'); return;
+  }
   if(ptrs.has(ev.pointerId))ptrs.set(ev.pointerId,p);
   if(gesture&&gesture.mode==='pinch'&&ptrs.size===2){
     const arr=[...ptrs.values()];
@@ -1589,9 +1797,11 @@ function tryPlace(type,i,j){
 }
 function buildPalette(){
   for(const type of Object.keys(ELEMS)){
+    if(type==='meter')continue;        // 探测器从「测量」板块放置
     const def=ELEMS[type];
     const b=document.createElement('button');
     b.className='pal';
+    b.dataset.type=type;               // 供 setLang 按真实类型重标，避免跳过 meter 后索引错位
     b.title=elName(type);
     b.innerHTML='<span class="ic">'+def.icon+'</span><span class="lb">'+elName(type)+'</span>';
     let drag=null;
@@ -1901,6 +2111,9 @@ function renderProps(){
     if(!P.poly)range(tr('l_lam'),'lam',200,1600,1);
     range(tr('l_width'),'width',1,200,1);
     range(tr('l_bri'),'bri',0.1,2,0.05);
+    if(P.polMode===undefined)P.polMode='unpol';
+    select(tr('l_polMode'),'polMode',[['unpol',tr('o_unpol')],['linear',tr('o_linear')]]);
+    if(P.polMode==='linear')range(tr('l_polAng'),'polAng',-90,90,1);
   }else if(e.type==='cmirror'){
     range(tr('l_f'),'f',0.5,6,0.1);
   }else if(e.type==='lensCX'){
@@ -1936,6 +2149,17 @@ function renderProps(){
     range(tr('l_effMax'),'effMax',0,100,1);
     range(tr('l_pmAngle'),'pmAngle',0,80,1);
     range(tr('l_accept'),'accept',3,60,1);
+  }else if(e.type==='polarizer'){
+    range(tr('l_axis'),'axis',-90,90,1);
+  }else if(e.type==='halfwave'){
+    range(tr('l_fast'),'fast',-90,90,1);
+  }else if(e.type==='pbs'){
+    range(tr('l_axis'),'axis',-90,90,1);
+  }else if(e.type==='meter'){
+    const rd=document.createElement('div');
+    rd.className='empty'; rd.id='meterVal'; rd.style.lineHeight='1.9';
+    rd.innerHTML=meterText(e);
+    propsEl.appendChild(rd);
   }else if(e.type==='custom'){
     select(tr('l_outMode'),'outMode',[['pass',tr('o_pass')],['mirror',tr('o_mirror')],['rel',tr('o_rel')],['abs',tr('o_abs')]]);
     if(P.outMode==='rel')range(tr('l_dTheta'),'dTheta',-180,180,1);
@@ -2342,7 +2566,7 @@ function setLang(lang){
   if(typeof tgHide!=='undefined'&&tgHide)tgHide.title=hideElems?tr('showTitle'):tr('hideTitle');
   // 重建调色板标签、重绘属性面板、刷新提示与导出读数
   document.querySelectorAll('#palette .pal').forEach((b,idx)=>{
-    const type=Object.keys(ELEMS)[idx];
+    const type=b.dataset.type||Object.keys(ELEMS)[idx];
     if(!type)return;
     b.title=elName(type);
     const lbl=b.querySelector('.lb');
@@ -2596,6 +2820,46 @@ function makeOptic(k,e){
     const ap=new THREE.Mesh(new THREE.CylinderGeometry(apR*0.92,apR*0.92,0.012,24),
       new THREE.MeshBasicMaterial({color:glowColor(col,1.3)}));
     ap.rotation.x=Math.PI/2; ap.position.z=-0.355; g.add(ap);
+    return placeByBasis(g,c,t,nrm,BEAMY);
+  }
+  if(type==='polarizer'){
+    const g=new THREE.Group(), R1=HEL/2;
+    const disc=new THREE.Mesh(new THREE.CylinderGeometry(R1,R1,0.05,40),
+      new THREE.MeshPhysicalMaterial({color:0x9fb6d6,metalness:0.1,roughness:0.22,transmission:0.55,ior:1.5,thickness:0.06,transparent:true,side:THREE.DoubleSide,envMapIntensity:0.6}));
+    disc.rotation.x=Math.PI/2; g.add(disc);
+    g.add(new THREE.Mesh(new THREE.TorusGeometry(R1,0.03,10,40),MAT.metalMount));
+    const bar=new THREE.Mesh(new THREE.BoxGeometry(R1*1.85,0.04,0.06),
+      new THREE.MeshStandardMaterial({color:0xffb454,emissive:0x5a3a10,emissiveIntensity:0.5}));
+    bar.position.z=0.035; bar.rotation.z=(e.props.axis||0)*Math.PI/180; g.add(bar);   // 透光轴
+    return placeByBasis(g,c,t,nrm,BEAMY);
+  }
+  if(type==='halfwave'){
+    const g=new THREE.Group(), R1=HEL/2;
+    const disc=new THREE.Mesh(new THREE.CylinderGeometry(R1,R1,0.06,40),
+      new THREE.MeshPhysicalMaterial({color:0x7fd0a8,metalness:0.05,roughness:0.14,transmission:0.6,ior:1.55,thickness:0.07,transparent:true,side:THREE.DoubleSide,envMapIntensity:0.6}));
+    disc.rotation.x=Math.PI/2; g.add(disc);
+    g.add(new THREE.Mesh(new THREE.TorusGeometry(R1,0.03,10,40),MAT.metalMount));
+    const bar=new THREE.Mesh(new THREE.BoxGeometry(R1*1.85,0.035,0.07),
+      new THREE.MeshStandardMaterial({color:0x39d98a,emissive:0x155538,emissiveIntensity:0.5}));
+    bar.position.z=0.04; bar.rotation.z=(e.props.fast||0)*Math.PI/180; g.add(bar);     // 快轴
+    return placeByBasis(g,c,t,nrm,BEAMY);
+  }
+  if(type==='pbs'){
+    const g=new THREE.Group(), s=HEL*0.82;
+    g.add(new THREE.Mesh(new THREE.BoxGeometry(s,s,s),
+      new THREE.MeshPhysicalMaterial({color:0xcfe0f2,metalness:0.05,roughness:0.08,transmission:0.85,ior:1.52,thickness:0.5,transparent:true,side:THREE.DoubleSide,envMapIntensity:0.9})));
+    g.add(new THREE.Mesh(new THREE.PlaneGeometry(s*0.99,s*0.99),   // 局部 X-Y 面 = 反射镀膜界面
+      new THREE.MeshPhysicalMaterial({color:0xbcd8f5,metalness:0.4,roughness:0.12,transparent:true,opacity:0.3,side:THREE.DoubleSide,envMapIntensity:1.0})));
+    return placeByBasis(g,c,t,nrm,BEAMY);
+  }
+  if(type==='meter'){
+    const g=new THREE.Group();
+    g.add(new THREE.Mesh(new THREE.BoxGeometry(hf*1.6,HEL,0.2),
+      new THREE.MeshStandardMaterial({color:0x222a33,metalness:0.6,roughness:0.42})));
+    const face=new THREE.Mesh(new THREE.BoxGeometry(hf*1.4,HEL-0.12,0.05),
+      new THREE.MeshStandardMaterial({color:0x0c1a14,emissive:0x1f7a4a,emissiveIntensity:0.55,roughness:0.5}));
+    face.position.z=0.1; g.add(face);
+    const face2=face.clone(); face2.position.z=-0.1; g.add(face2);
     return placeByBasis(g,c,t,nrm,BEAMY);
   }
   // 自定义：深色模块盒 + 强调色条
