@@ -457,6 +457,10 @@ body.light #rqseg button.on{color:#fff}
       </ol>
       <div class="hcredit"><b>About</b><br>Author aCan<br>Contact <a href="mailto:d202180082@gmail.com">d202180082@gmail.com</a><br>If it helps, tap Tip at the top right</div>
     </div>
+    <div class="hcredit" style="text-align:center">
+      <span id="busuanzi_container_site_pv" style="display:none">访问量 <span id="busuanzi_value_site_pv"></span></span>
+      <span id="busuanzi_container_site_uv" style="display:none"> · 访客 <span id="busuanzi_value_site_uv"></span></span>
+    </div>
   </div>
 </div>
 <div id="expmask" hidden>
@@ -2938,5 +2942,9 @@ $('d3export').addEventListener('click',exportPNG);
 // 退出 3D 的快捷键
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&d3on)exit3D();});
 </script>
+<!-- 不蒜子访问统计：按域名统计总浏览量(PV)与访客数(UV)，数字显示在「帮助 ? → 关于」栏。
+     若部署后数字始终不显示，多为官方服务波动；把下面的 src 换成维护中的兼容镜像即可（span 不用改），
+     例如 Vercount：  <script defer src="https://cn.vercount.one/js"></script>  -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </body>
 </html>
